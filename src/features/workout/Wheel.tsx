@@ -14,8 +14,10 @@ export function Wheel({ value, step, min = 0, onChange, label, active, suffix, w
 }) {
   const { colors } = useTheme();
   const base = useRef(value);
-  const latest = useRef({ value, onChange });
-  latest.current = { value, onChange };
+  // `step` y `min` también van por ref: el PanResponder se crea una sola vez y, si no, se quedaría con los del primer render
+  // (p. ej. al cambiar el objetivo de cardio de pasos a minutos seguía aplicando el mínimo de 500).
+  const latest = useRef({ value, onChange, step, min });
+  latest.current = { value, onChange, step, min };
   const last = useRef(0);
   const lock = useRef(useScrollLock());
   lock.current = useScrollLock();
@@ -34,7 +36,8 @@ export function Wheel({ value, step, min = 0, onChange, label, active, suffix, w
         const steps = Math.round(-g.dy / 18); // arriba = subir
         if (steps !== last.current) {
           last.current = steps;
-          const next = Math.max(min, base.current + steps * step);
+          const { step: st, min: mn } = latest.current;
+          const next = Math.max(mn, base.current + steps * st);
           if (next !== latest.current.value) { latest.current.onChange(next); hapticTick(); }
         }
       },
