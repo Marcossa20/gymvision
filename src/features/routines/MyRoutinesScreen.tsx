@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Calendar, ChevronLeft, ChevronRight, Copy, Pencil, Plus, Trash2 } from 'lucide-react-native';
+import { Calendar, ChevronLeft, ChevronRight, Copy, EllipsisVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { Button, T } from '../../components/ui';
 import { WEEK_LETTERS, WEEK_NAMES, type Routine } from '../../data/seed';
 import { notify } from '../../services/alerts';
@@ -85,6 +85,11 @@ export function MyRoutinesScreen() {
                     </View>
                   ) : <T size={12} weight="500" color={colors.radioOff}>Sin día asignado</T>}
                 </View>
+                {/* Botón visible de «Más opciones» (editar, duplicar, días, eliminar): la pulsación larga no se descubre sola. */}
+                <Pressable accessibilityRole="button" accessibilityLabel={`Más opciones de ${r.name}`} onPress={() => setMode({ kind: 'menu', routine: r })}
+                  style={{ width: 44, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+                  <EllipsisVertical size={22} color={colors.textSecondary} />
+                </Pressable>
                 <ChevronRight size={22} color={colors.textSecondary} />
               </Pressable>
             );
