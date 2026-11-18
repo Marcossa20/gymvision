@@ -12,38 +12,10 @@ import { lookupMachine, machineRoute } from '../../services/qr';
 import { useWorkout } from '../../store/workout';
 import { rankFromPoints, RANK_NAMES } from '../../domain/ranks';
 import { useTheme } from '../../theme/useTheme';
-import type { Muscle } from '../../data/seed';
-import { muscleImages } from '../workout/muscleImages';
+import { MuscleIllustration } from '../ranks/MuscleIllustration';
 import { MUSCLE_LABELS } from '../ranks/muscles';
 import { rankImages } from '../ranks/rankImages';
 import { BottomActions, ScreenBar, StatusPill } from './ui';
-
-/** Siluetas de cuerpo entero (fondo negro) que se pueden superponer con «lighten», como en Figma. */
-const FULL_BODY: Partial<Record<Muscle, number>> = {
-  pecho: require('../../../assets/muscles/plan-pecho.jpg'),
-  hombros: require('../../../assets/muscles/plan-hombros.jpg'),
-  dorsales: require('../../../assets/muscles/plan-dorsales.jpg'),
-};
-
-function MuscleIllustration({ muscles, width }: { muscles: Muscle[]; width: number }) {
-  const { colors } = useTheme();
-  const full = muscles.filter((m) => FULL_BODY[m] !== undefined);
-  // Encaje de Figma: imagen de 367,5 × 658 desplazada (-5, -66) dentro de un hueco de 348 × 138.
-  const k = width / 348;
-  return (
-    <View style={{ height: 170, backgroundColor: colors.bg, justifyContent: 'center' }} accessible accessibilityLabel={`Músculos: ${muscles.map((m) => MUSCLE_LABELS[m]).join(', ')}`}>
-      <View style={{ height: 138, borderRadius: 16, overflow: 'hidden' }}>
-        {full.length === muscles.length && full.length > 0 ? (
-          full.map((m, i) => (
-            <Image key={m} source={FULL_BODY[m]!} resizeMode="cover" style={{ position: 'absolute', left: -5 * k, top: -66 * k, width: 367.5 * k, height: 658.4 * k, mixBlendMode: i === 0 ? 'normal' : 'lighten' }} />
-          ))
-        ) : (
-          <Image source={muscleImages[muscles[0]]} resizeMode="contain" style={{ width: '100%', height: '100%' }} />
-        )}
-      </View>
-    </View>
-  );
-}
 
 interface LastSets { weight: number; reps: number; sets: number; daysAgo: number }
 /** TODO(issue [para A]): el historial aún no guarda series por ejercicio; cuando exista, leerlo aquí. */
