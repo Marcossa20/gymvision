@@ -1,6 +1,6 @@
 // Teoría (RF2): series, reps, peso y descanso con el mismo gesto de deslizar que en el entreno (consistencia).
 // Cardio: un único objetivo (tiempo | pasos | distancia); «pasos» solo en Caminata y Correr (acelerómetro).
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -10,6 +10,7 @@ import { exerciseById, type CardioGoal } from '../../data/seed';
 import { fmtClock, fmtNum } from '../../domain/format';
 import { notify } from '../../services/alerts';
 import { useTheme } from '../../theme/useTheme';
+import { ScrollLockContext } from '../workout/scrollLock';
 import { Wheel } from '../workout/Wheel';
 import { useDraft } from './draft';
 import { ExThumb, muscleLabel } from './Thumb';
@@ -26,6 +27,7 @@ export function ConfigureExerciseScreen() {
   const { index } = useLocalSearchParams<{ index: string }>();
   const i = Number(index);
   const { draft, update, remove, insert } = useDraft();
+  const [scrollLocked, setScrollLocked] = useState(false);
   const e = draft?.exercises[i];
   if (!draft || !e) return null;
   const ex = exerciseById(e.exerciseId);
@@ -48,7 +50,8 @@ export function ConfigureExerciseScreen() {
         <T size={18} weight="600" accessibilityRole="header" style={{ flex: 1, textAlign: 'center' }}>Configurar ejercicio</T>
         <Pressable accessibilityRole="button" accessibilityLabel="Guardar" onPress={() => router.back()} style={{ minWidth: 64, height: 48, alignItems: 'center', justifyContent: 'center' }}><T size={16} weight="600" color="brand">Guardar</T></Pressable>
       </View>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 120, gap: 16 }}>
+      <ScrollLockContext.Provider value={setScrollLocked}>
+      <ScrollView scrollEnabled={!scrollLocked} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 120, gap: 16 }}>
         <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 12, borderRadius: 20, backgroundColor: colors.card }, border]}>
           <ExThumb ex={ex} size={72} radius={18} />
           <View style={{ flex: 1, gap: 4 }}>
@@ -113,6 +116,7 @@ export function ConfigureExerciseScreen() {
         </View>
         <Button label="Quitar de la rutina" variant="secondary" onPress={quitar} />
       </ScrollView>
+      </ScrollLockContext.Provider>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingBottom: 24, paddingTop: 12, backgroundColor: colors.bg }}>
         <Button label="Guardar ejercicio" onPress={() => router.back()} />
       </View>
