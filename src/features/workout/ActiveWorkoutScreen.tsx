@@ -4,14 +4,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Image, Modal, PanResponder, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Check, ChevronDown, Pencil, Play, Plus, Repeat, SkipForward, Timer, Trash2 } from 'lucide-react-native';
+import { Check, ChevronDown, Footprints, Pencil, Play, Plus, Repeat, SkipForward, Timer, Trash2 } from 'lucide-react-native';
 import { Button, T } from '../../components/ui';
 import { exerciseById } from '../../data/seed';
 import { fmtClock, fmtNum } from '../../domain/format';
 import { notify } from '../../services/alerts';
 import { hapticTick } from '../../services/haptics';
-import { useWorkout } from '../../store/workout';
+import { useCardio, type CardioSession } from '../../store/cardio';
+import { useWorkout, type ActiveExercise } from '../../store/workout';
 import { useTheme } from '../../theme/useTheme';
+import { ExThumb } from '../routines/Thumb';
 import { muscleImages } from './muscleImages';
 import { ScrollLockContext, useScrollLock } from './scrollLock';
 import { Wheel } from './Wheel';
@@ -67,6 +69,29 @@ function SetRow({ index, ex, selected, onRemove, children }: {
   );
 }
 
+/**
+ * Cardio dentro del entreno (contrato REPARTO §2.2): en vez de series/peso hay un objetivo y un botón que abre
+ * /cardio/run (acelerómetro, de B). Al volver, la sesión guardada marca el ejercicio como hecho.
+ */
+function CardioPanel({ item, session, onStart }: { item: ActiveExercise; session?: CardioSession; onStart: () => void }) {
+  const { colors } = useTheme();
+  const goalText = item.goal === 'steps' ? `${fmtNum(item.target ?? 0)} pasos` : item.goal === 'distance' ? `${fmtNum(item.target ?? 0)} km` : `${fmtNum(item.target ?? 30)} min`;
+  return (
+    <View style={{ gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 20, backgroundColor: colors.card, borderWidth: session ? 2 : 1, borderColor: session ? colors.brand : colors.divider }}>
+        <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
+          {session ? <Check size={26} color={colors.brand} strokeWidth={3} /> : <Footprints size={26} color={colors.brand} />}
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <T size={13} color="secondary">{session ? 'Completado' : 'Objetivo'}</T>
+          <T size={18} weight="700">{session ? `${Math.max(1, Math.round(session.activeMs / 60000))} min · ${fmtNum(session.steps)} pasos` : goalText}</T>
+        </View>
+      </View>
+      <Button label={session ? 'Repetir cardio' : 'Empezar cardio'} onPress={onStart} icon={<Play size={20} color={colors.onBrand} fill={colors.onBrand} />} />
+    </View>
+  );
+}
+
 export function ActiveWorkoutScreen() {
   const { colors } = useTheme();
   const router = useRouter();
@@ -77,6 +102,8 @@ export function ActiveWorkoutScreen() {
   const [exIndex, setExIndex] = useState(0);
   const [scrollLocked, setScrollLocked] = useState(false);
   const [confirm, setConfirm] = useState(false);
+  const cardioSessions = useCardio((st) => st.sessions);
+  const cardioDone = (id: string) => (a ? cardioSessions.find((x) => x.exerciseId === id && x.date >= a.startedAt) : undefined);
 
   // El aviso de fin de descanso lo gestiona services/notifications.ts (funciona aunque salgas de esta pantalla).
   // Al terminar el entreno `a` pasa a null y se navega al resumen; esta redirección solo es para cuando no hay entreno.
@@ -115,20 +142,21 @@ export function ActiveWorkoutScreen() {
       <ScrollView scrollEnabled={!scrollLocked} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: restEndsAt ? 150 : 40, gap: 14 }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, padding: 3 }}>
           {a.items.map((it, i) => {
-            const m = exerciseById(it.exerciseId).muscles[0];
+            const itEx = exerciseById(it.exerciseId);
+            const isCardio = itEx.type === 'cardio';
             const sel = i === exIndex;
             return (
               <Pressable key={i} accessibilityRole="button" accessibilityLabel={`Ejercicio ${i + 1}: ${exerciseById(it.exerciseId).name}`} accessibilityState={{ selected: sel }} onPress={() => setExIndex(i)}
                 style={{ width: 64, height: 64, borderRadius: 32, overflow: 'hidden', borderWidth: sel ? 3 : 1, borderColor: sel ? colors.brand : colors.divider, backgroundColor: '#070707' }}>
-                {m ? <Image source={muscleImages[m]} style={{ width: 64, height: 64 }} resizeMode="cover" accessibilityIgnoresInvertColors /> : null}
-                {it.sets.every((s) => s.done) ? <View style={{ position: 'absolute', right: 2, bottom: 2, backgroundColor: colors.brand, borderRadius: 9, padding: 2 }}><Check size={12} color={colors.onBrand} strokeWidth={3} /></View> : null}
+                <ExThumb ex={itEx} size={64} radius={0} />
+                {(isCardio ? !!cardioDone(it.exerciseId) : it.sets.every((s) => s.done)) ? <View style={{ position: 'absolute', right: 2, bottom: 2, backgroundColor: colors.brand, borderRadius: 9, padding: 2 }}><Check size={12} color={colors.onBrand} strokeWidth={3} /></View> : null}
               </Pressable>
             );
           })}
         </ScrollView>
 
         <View style={{ height: 166, borderRadius: 24, backgroundColor: '#070707', borderWidth: 1, borderColor: colors.divider, alignItems: 'center', justifyContent: 'center', gap: 6, overflow: 'hidden' }}>
-          {ex.muscles[0] ? <Image source={muscleImages[ex.muscles[0]]} style={{ width: '100%', height: 138 }} resizeMode="cover" accessibilityIgnoresInvertColors /> : null}
+          {ex.type === 'cardio' ? <ExThumb ex={ex} size={138} radius={16} /> : ex.muscles[0] ? <Image source={muscleImages[ex.muscles[0]]} style={{ width: '100%', height: 138 }} resizeMode="cover" accessibilityIgnoresInvertColors /> : null}
           <T size={13} weight="500" color="secondary">{ex.muscles.map((m) => m.charAt(0).toUpperCase() + m.slice(1)).join(' · ') || 'Cardio'}</T>
         </View>
 
@@ -142,6 +170,9 @@ export function ActiveWorkoutScreen() {
           ))}
         </View>
 
+        {ex.type === 'cardio' ? (
+          <CardioPanel item={item} session={cardioDone(item.exerciseId)} onStart={() => router.push({ pathname: '/cardio/run', params: { exerciseId: item.exerciseId, ...(item.goal ? { goal: item.goal } : {}), ...(item.target ? { target: String(item.target) } : {}) } } as never)} />
+        ) : (
         <View style={{ gap: 8 }}>
           <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 8, alignItems: 'center' }}>
             <T size={11} weight="600" color={colors.radioOff} style={{ width: 32, textAlign: 'center' }}>SERIE</T>
@@ -175,6 +206,7 @@ export function ActiveWorkoutScreen() {
             <Plus size={20} color={colors.brand} /><T size={15} weight="600" color="brand">Añadir serie</T>
           </Pressable>
         </View>
+        )}
       </ScrollView>
       </ScrollLockContext.Provider>
 
