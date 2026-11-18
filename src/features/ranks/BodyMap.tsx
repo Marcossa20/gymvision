@@ -2,17 +2,18 @@
 // Las imágenes son las siluetas del Figma (página «Músculos · reserva»): una silueta gris y una máscara por
 // músculo que se TINTA con el color del rango → mismo aspecto realista que el Figma, pero el color sale de
 // useRankColors() y cambia con el modo daltonismo (Reto 1).
-// Teoría (el color nunca va solo): cada músculo con rango lleva además el símbolo de su rango (●◆★♦⬢✦)
-// y la leyenda repite símbolo + nombre. Toque: la rejilla de zonas decide qué músculo se pulsa.
+// El color se aplica con mezcla «color» + «luz suave» sobre la silueta: conserva el relieve del músculo.
+// Debajo, la leyenda dice qué rango es cada color. Toque: la rejilla de zonas decide qué músculo se pulsa.
+// Teoría (Reto 1): el nombre del rango también aparece en las tarjetas de debajo, no solo el color.
 import React from 'react';
 import { Image, Pressable, View, type GestureResponderEvent } from 'react-native';
 import { T } from '../../components/ui';
 import type { Muscle } from '../../data/seed';
-import { RANK_NAMES, RANK_SHAPES } from '../../domain/ranks';
+import { RANK_NAMES } from '../../domain/ranks';
 import { useRankColors, useTheme } from '../../theme/useTheme';
 import { alpha } from '../gym/ui';
 import type { MuscleRank } from './data';
-import { MAP_CENTROIDS, MAP_GRID, MAP_ORDER } from './mapData';
+import { MAP_GRID, MAP_ORDER } from './mapData';
 import { MAP_IMAGES } from './mapImages';
 
 const W = 146, H = 262; // tamaño de la figura en Figma
@@ -44,17 +45,18 @@ function Figure({ side, ranks, onPress }: { side: 'front' | 'back'; ranks: Recor
       onPress={(e: GestureResponderEvent) => { const m = hit(side, e.nativeEvent.locationX, e.nativeEvent.locationY); if (m) onPress(m); }}
       accessibilityRole="image"
       accessibilityLabel={`Mapa muscular, vista de ${side === 'front' ? 'frente' : 'espalda'}. Usa la lista de abajo para ver cada músculo.`}
-      style={{ width: W, height: H, borderRadius: 12, overflow: 'hidden', backgroundColor: '#070707' }}
+      style={{ width: W, height: H, borderRadius: 12, overflow: 'hidden', backgroundColor: '#070707', isolation: 'isolate' }}
     >
       <Image source={imgs.base} style={{ position: 'absolute', width: W, height: H }} resizeMode="stretch" accessibilityIgnoresInvertColors />
-      {ranked.map((m) => (
-        <Image key={m} source={imgs.muscles[m]} tintColor={palette[ranks[m].rank!.tier]} style={{ position: 'absolute', width: W, height: H, opacity: 0.82 }} resizeMode="stretch" accessibilityIgnoresInvertColors />
-      ))}
-      {ranked.flatMap((m) => (MAP_CENTROIDS[side][m] ?? []).map(([cx, cy], i) => (
-        <View key={`${m}${i}`} pointerEvents="none" style={{ position: 'absolute', left: cx * W - 8, top: cy * H - 8, width: 16, height: 16, borderRadius: 8, backgroundColor: 'rgba(7,7,7,0.78)', alignItems: 'center', justifyContent: 'center' }}>
-          <T size={9} weight="700" color="#FFFFFF">{RANK_SHAPES[ranks[m].rank!.tier]}</T>
-        </View>
-      )))}
+      {ranked.map((m) => {
+        const c = palette[ranks[m].rank!.tier];
+        return (
+          <React.Fragment key={m}>
+            <Image source={imgs.muscles[m]} tintColor={c} style={{ position: 'absolute', width: W, height: H, mixBlendMode: 'color' }} resizeMode="stretch" accessibilityIgnoresInvertColors />
+            <Image source={imgs.muscles[m]} tintColor={c} style={{ position: 'absolute', width: W, height: H, mixBlendMode: 'soft-light', opacity: 0.9 }} resizeMode="stretch" accessibilityIgnoresInvertColors />
+          </React.Fragment>
+        );
+      })}
     </Pressable>
   );
 }
@@ -72,22 +74,19 @@ export function BodyMap({ ranks, onPress }: { ranks: Record<Muscle, MuscleRank>;
           </View>
         ))}
       </View>
-      {/* Leyenda: símbolo + nombre + color */}
+      {/* Leyenda: qué rango es cada color */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', columnGap: 12, rowGap: 8 }} accessible accessibilityLabel={`Leyenda: sin entrenar, ${RANK_NAMES.join(', ')}`}>
-        <Legend color={alpha(colors.radioOff, 0.5)} shape="" label="Sin entrenar" />
-        {RANK_NAMES.map((n, i) => <Legend key={n} color={palette[i]} shape={RANK_SHAPES[i]} label={n} />)}
+        <Legend color={alpha(colors.radioOff, 0.5)} label="Sin entrenar" />
+        {RANK_NAMES.map((n, i) => <Legend key={n} color={palette[i]} label={n} />)}
       </View>
     </View>
   );
 }
 
-function Legend({ color, shape, label }: { color: string; shape: string; label: string }) {
-  const { colors } = useTheme();
+function Legend({ color, label }: { color: string; label: string }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-      <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}>
-        {shape ? <T size={8} weight="700" color={colors.bg}>{shape}</T> : null}
-      </View>
+      <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: color }} />
       <T size={11.5} weight="500" color="secondary">{label}</T>
     </View>
   );
