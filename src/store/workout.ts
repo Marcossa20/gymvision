@@ -8,7 +8,7 @@ import { notify } from '../services/alerts';
 import { pointsFor, rankFromPoints } from '../domain/ranks';
 
 export interface SetItem { weight: number; reps: number; done: boolean }
-export interface ActiveExercise { exerciseId: string; restSec: number; sets: SetItem[] }
+export interface ActiveExercise { exerciseId: string; restSec: number; sets: SetItem[]; /** Cardio: objetivo único (min | pasos | km). */ goal?: 'time' | 'steps' | 'distance'; target?: number }
 export interface ActiveWorkout { routineId: string; name: string; startedAt: number; items: ActiveExercise[] }
 export interface LastSets { date: number; sets: { weight: number; reps: number }[] }
 /** Récord personal: más peso que tu mejor marca anterior en ese ejercicio. */
@@ -82,7 +82,7 @@ export const useWorkout = create<WorkoutState>()(
           active: {
             routineId, name: r.name, startedAt: Date.now(),
             items: r.exercises.map((e) => ({
-              exerciseId: e.exerciseId, restSec: e.restSec,
+              exerciseId: e.exerciseId, restSec: e.restSec, goal: e.goal, target: e.target,
               sets: Array.from({ length: e.sets }, () => ({ weight: e.weight, reps: e.reps, done: false })),
             })),
           },
