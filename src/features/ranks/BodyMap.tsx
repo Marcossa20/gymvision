@@ -5,101 +5,93 @@
 // Dibujado en SVG (no imagen fija) para poder recolorearlo con los datos y los ajustes del usuario.
 import React from 'react';
 import { View } from 'react-native';
-import Svg, { Ellipse, G, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Ellipse, G, Path, Text as SvgText } from 'react-native-svg';
 import { T } from '../../components/ui';
 import type { Muscle } from '../../data/seed';
 import { RANK_NAMES, RANK_SHAPES } from '../../domain/ranks';
 import { useRankColors, useTheme } from '../../theme/useTheme';
+import { alpha } from '../gym/ui';
 import type { MuscleRank } from './data';
 
-type Shape =
-  | { k: 'e'; cx: number; cy: number; rx: number; ry: number }
-  | { k: 'r'; x: number; y: number; w: number; h: number; r: number }
-  | { k: 'p'; d: string };
+// Lienzo 146 × 262. Cada músculo se dibuja una vez (mitad izquierda) y se refleja con mirror().
+// Solo se usan órdenes M/L/Q/Z con coordenadas absolutas (así el reflejo es cambiar cada x por 146 − x).
+const mirror = (d: string) => {
+  let i = 0;
+  return d.replace(/-?\d+(\.\d+)?/g, (n) => (i++ % 2 === 0 ? String(146 - Number(n)) : n));
+};
+const both = (d: string) => [d, mirror(d)];
 
-// Lienzo 146 × 262 (tamaño de la figura en Figma). Cada músculo: formas a ambos lados.
-const mirror = (s: Shape): Shape => {
-  if (s.k === 'e') return { ...s, cx: 146 - s.cx };
-  if (s.k === 'r') return { ...s, x: 146 - s.x - s.w };
-  let i = 0; // en M/L/Q todos los números van en parejas x y: se refleja cada x
-  return { k: 'p', d: s.d.replace(/-?\d+(\.\d+)?/g, (n) => (i++ % 2 === 0 ? String(146 - Number(n)) : n)) };
+const FRONT: Partial<Record<Muscle, string[]>> = {
+  cuello: both('M73 37 L66 39 Q65 44 67 48 L73 50 Z'),
+  trapecio: both('M67 48 L58 51 Q62 53 66 56 Z'),
+  hombros: both('M54 51 Q43 51 39 63 Q38 72 46 75 Q55 70 58 57 Z'),
+  pecho: both('M73 54 L58 55 Q52 64 56 73 Q65 79 73 73 Z'),
+  biceps: both('M42 77 Q37 86 38 96 L47 97 Q51 87 48 76 Z'),
+  antebrazos: both('M36 99 Q32 111 33 124 L41 126 Q45 113 45 100 Z'),
+  abdominales: both('M73 77 L62 77 Q60 91 61 105 Q62 117 67 125 L73 127 Z'),
+  abductores: both('M54 129 Q49 141 51 153 L57 154 Q59 142 58 131 Z'),
+  cuadriceps: both('M57 138 Q51 160 54 186 L66 187 Q69 161 67 140 Z'),
+  aductores: both('M68 143 L73 143 L72 177 Q69 181 67 186 Q69 162 68 143 Z'),
 };
 
-const pair = (s: Shape) => [s, mirror(s)];
-
-const FRONT: Partial<Record<Muscle, Shape[]>> = {
-  cuello: [{ k: 'r', x: 66, y: 37, w: 14, h: 10, r: 4 }],
-  trapecio: [{ k: 'p', d: 'M57 50 L66 43 L66 50 Z' }, { k: 'p', d: 'M89 50 L80 43 L80 50 Z' }],
-  hombros: pair({ k: 'e', cx: 48, cy: 60, rx: 11, ry: 10 }),
-  pecho: pair({ k: 'r', x: 55, y: 51, w: 17.5, h: 23, r: 7 }),
-  biceps: pair({ k: 'e', cx: 41, cy: 84, rx: 7, ry: 14 }),
-  antebrazos: pair({ k: 'e', cx: 35, cy: 114, rx: 6, ry: 15 }),
-  abdominales: [{ k: 'r', x: 61, y: 77, w: 24, h: 44, r: 8 }],
-  abductores: pair({ k: 'e', cx: 53, cy: 137, rx: 5, ry: 12 }),
-  aductores: pair({ k: 'p', d: 'M66 132 Q72 132 72 140 L70 172 Q66 168 64 150 Z' }),
-  cuadriceps: pair({ k: 'e', cx: 60, cy: 162, rx: 10, ry: 28 }),
+const BACK: Partial<Record<Muscle, string[]>> = {
+  hombros: both('M54 51 Q43 51 39 63 Q38 72 46 75 Q55 70 58 57 Z'),
+  dorsales: both('M73 92 L62 68 Q54 75 55 91 Q58 105 73 109 Z'),
+  trapecio: both('M73 39 L66 45 Q58 50 56 55 L62 66 Q67 78 73 94 Z'),
+  triceps: both('M42 77 Q37 86 38 96 L47 97 Q51 87 48 76 Z'),
+  antebrazos: both('M36 99 Q32 111 33 124 L41 126 Q45 113 45 100 Z'),
+  lumbar: both('M73 109 L63 106 Q61 117 63 126 L73 128 Z'),
+  gluteos: both('M73 128 L59 127 Q52 136 54 147 Q63 155 73 151 Z'),
+  femoral: both('M56 153 Q50 169 53 188 L68 188 Q71 169 70 155 Z'),
+  gemelos: both('M54 194 Q50 212 55 233 L67 233 Q70 212 67 195 Z'),
 };
 
-const BACK: Partial<Record<Muscle, Shape[]>> = {
-  trapecio: [{ k: 'p', d: 'M73 38 L90 52 L80 58 L73 84 L66 58 L56 52 Z' }],
-  hombros: pair({ k: 'e', cx: 48, cy: 60, rx: 11, ry: 10 }),
-  dorsales: pair({ k: 'p', d: 'M57 64 L71 66 L71 104 Q62 100 55 86 Z' }),
-  triceps: pair({ k: 'e', cx: 41, cy: 84, rx: 7, ry: 14 }),
-  antebrazos: pair({ k: 'e', cx: 35, cy: 114, rx: 6, ry: 15 }),
-  lumbar: [{ k: 'r', x: 63, y: 104, w: 20, h: 20, r: 5 }],
-  gluteos: pair({ k: 'e', cx: 63, cy: 138, rx: 11, ry: 12 }),
-  femoral: pair({ k: 'e', cx: 61, cy: 174, rx: 10, ry: 23 }),
-  gemelos: pair({ k: 'e', cx: 61, cy: 214, rx: 8, ry: 17 }),
-};
+/** Músculos centrales: un único símbolo de rango en el eje (no uno por mitad). */
+const CENTER = new Set<Muscle>(['cuello', 'abdominales', 'lumbar', 'trapecio']);
 
-/** Silueta base (partes sin músculo asignado). */
-const BASE: Shape[] = [
-  { k: 'e', cx: 73, cy: 21, rx: 13, ry: 16 }, // cabeza
-  { k: 'r', x: 56, y: 46, w: 34, h: 82, r: 12 }, // tronco
-  ...pair({ k: 'e', cx: 30, cy: 136, rx: 5, ry: 7 }), // manos
-  { k: 'r', x: 51, y: 120, w: 44, h: 24, r: 10 }, // cadera
-  ...pair({ k: 'e', cx: 60, cy: 162, rx: 11, ry: 30 }), // muslos
-  ...pair({ k: 'e', cx: 61, cy: 214, rx: 8, ry: 20 }), // piernas
-  ...pair({ k: 'e', cx: 60, cy: 242, rx: 8, ry: 5 }), // pies
-  ...pair({ k: 'e', cx: 41, cy: 84, rx: 8, ry: 15 }), // brazos
-  ...pair({ k: 'e', cx: 35, cy: 114, rx: 7, ry: 16 }),
+/** Silueta base: cuerpo entero de una pieza para que las zonas sin músculo no queden «vacías». */
+const BASE_HALF = [
+  'M73 46 Q62 47 54 51 Q50 56 52 70 Q54 90 57 106 Q58 120 56 132 L73 138 Z', // tronco
+  'M52 53 Q42 53 38 64 Q35 80 36 95 L46 97 Q48 82 54 70 Z', // brazo
+  'M36 97 Q32 111 32 125 L41 127 Q45 113 46 99 Z', // antebrazo
+  'M55 134 Q49 160 52 190 L68 190 Q72 160 73 138 Z', // muslo
+  'M53 192 Q50 214 54 240 L66 240 Q69 214 68 192 Z', // pierna
 ];
 
-function center(s: Shape) {
-  if (s.k === 'e') return { x: s.cx, y: s.cy };
-  if (s.k === 'r') return { x: s.x + s.w / 2, y: s.y + s.h / 2 };
-  const nums = s.d.match(/-?\d+(\.\d+)?/g)!.map(Number);
-  const xs = nums.filter((_, i) => i % 2 === 0);
-  const ys = nums.filter((_, i) => i % 2 === 1);
+const labelPos = (d: string) => {
+  const n = d.match(/-?\d+(\.\d+)?/g)!.map(Number);
+  const xs = n.filter((_, i) => i % 2 === 0);
+  const ys = n.filter((_, i) => i % 2 === 1);
   return { x: xs.reduce((a, b) => a + b, 0) / xs.length, y: ys.reduce((a, b) => a + b, 0) / ys.length };
-}
-
-function ShapeEl({ s, fill, stroke }: { s: Shape; fill: string; stroke: string }) {
-  if (s.k === 'e') return <Ellipse cx={s.cx} cy={s.cy} rx={s.rx} ry={s.ry} fill={fill} stroke={stroke} strokeWidth={1.2} />;
-  if (s.k === 'r') return <Rect x={s.x} y={s.y} width={s.w} height={s.h} rx={s.r} fill={fill} stroke={stroke} strokeWidth={1.2} />;
-  return <Path d={s.d} fill={fill} stroke={stroke} strokeWidth={1.2} />;
-}
+};
 
 function Figure({ side, ranks, onPress, width }: { side: 'front' | 'back'; ranks: Record<Muscle, MuscleRank>; onPress: (m: Muscle) => void; width: number }) {
   const { colors } = useTheme();
   const palette = useRankColors();
   const map = side === 'front' ? FRONT : BACK;
   const height = (width * 262) / 146;
+  const base = alpha(colors.divider, 0.55);
+  const idle = alpha(colors.radioOff, 0.5);
   return (
     <Svg width={width} height={height} viewBox="0 0 146 262">
-      {BASE.map((s, i) => <ShapeEl key={`b${i}`} s={s} fill={colors.divider} stroke={colors.bg} />)}
+      <Ellipse cx={73} cy={20} rx={12} ry={15} fill={base} />
+      <Path d="M67 34 L79 34 L79 48 L67 48 Z" fill={base} />
+      {BASE_HALF.flatMap(both).map((d, i) => <Path key={`b${i}`} d={d} fill={base} />)}
+      <Ellipse cx={34} cy={133} rx={5} ry={7} fill={base} />
+      <Ellipse cx={112} cy={133} rx={5} ry={7} fill={base} />
+      <Ellipse cx={60} cy={247} rx={9} ry={5} fill={base} />
+      <Ellipse cx={86} cy={247} rx={9} ry={5} fill={base} />
       {(Object.keys(map) as Muscle[]).map((m) => {
         const r = ranks[m]?.rank;
-        const fill = r ? palette[r.tier] : colors.switchOff;
+        const fill = r ? palette[r.tier] : idle;
+        const paths = map[m]!;
+        const labels = r ? (CENTER.has(m) ? [{ x: 73, y: labelPos(paths[0]).y }] : paths.map(labelPos)) : [];
         return (
           <G key={m} onPress={() => onPress(m)}>
-            {map[m]!.map((s, i) => <ShapeEl key={i} s={s} fill={fill} stroke={colors.bg} />)}
-            {r
-              ? map[m]!.map((s, i) => {
-                  const c = center(s);
-                  return <SvgText key={`t${i}`} x={c.x} y={c.y + 3} fontSize={8} fontWeight="bold" textAnchor="middle" fill={colors.bg}>{RANK_SHAPES[r.tier]}</SvgText>;
-                })
-              : null}
+            {paths.map((d, i) => <Path key={i} d={d} fill={fill} stroke={colors.bg} strokeWidth={1.1} strokeLinejoin="round" />)}
+            {labels.map((p, i) => (
+              <SvgText key={`t${i}`} x={p.x} y={p.y + 3} fontSize={8} fontWeight="bold" textAnchor="middle" fill={colors.bg}>{RANK_SHAPES[r!.tier]}</SvgText>
+            ))}
           </G>
         );
       })}
@@ -125,7 +117,7 @@ export function BodyMap({ ranks, onPress }: { ranks: Record<Muscle, MuscleRank>;
       </View>
       {/* Leyenda: forma + nombre + color */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', columnGap: 12, rowGap: 8 }} accessible accessibilityLabel={`Leyenda: sin entrenar, ${RANK_NAMES.join(', ')}`}>
-        <Legend color={colors.switchOff} shape="" label="Sin entrenar" />
+        <Legend color={alpha(colors.radioOff, 0.5)} shape="" label="Sin entrenar" />
         {RANK_NAMES.map((n, i) => <Legend key={n} color={palette[i]} shape={RANK_SHAPES[i]} label={n} />)}
       </View>
     </View>
