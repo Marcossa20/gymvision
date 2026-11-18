@@ -3,27 +3,32 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { exerciseById, routines as seedRoutines, type Routine } from '../data/seed';
+import { exerciseById, registerExercise, routines as seedRoutines, type Exercise, type Routine } from '../data/seed';
 import { notify } from '../services/alerts';
 import { pointsFor, rankFromPoints } from '../domain/ranks';
 
 export interface SetItem { weight: number; reps: number; done: boolean }
 export interface ActiveExercise { exerciseId: string; restSec: number; sets: SetItem[] }
 export interface ActiveWorkout { routineId: string; name: string; startedAt: number; items: ActiveExercise[] }
+export interface LastSets { date: number; sets: { weight: number; reps: number }[] }
 export interface WorkoutRecord { id: string; name: string; date: number; durationMin: number; volume: number; sets: number; points: number }
 
 interface WorkoutState {
   routines: Routine[];
+  customExercises: Exercise[];
   active: ActiveWorkout | null;
   restEndsAt: number | null;
   history: WorkoutRecord[];
   points: Record<string, number>; // puntos por ejercicio → rango
+  /** Últimas series completadas por ejercicio («Última vez: 32 kg × 12 · hace 2 días · 3 series»). */
+  lastSets: Record<string, LastSets>;
   streak: number;
   lastUndo: { exIndex: number; setIndex: number; set: SetItem } | null;
   lastSummary: WorkoutRecord | null;
   rankedUp: { from: string; to: string } | null;
 
   start: (routineId: string) => void;
+  startQuick: (exerciseId: string) => void;
   toggleSet: (ex: number, set: number) => void;
   setWeight: (ex: number, set: number, weight: number) => void;
   setReps: (ex: number, set: number, reps: number) => void;
@@ -34,6 +39,8 @@ interface WorkoutState {
   skipRest: () => void;
   finish: () => WorkoutRecord | null;
   discard: () => void;
+  addCustomExercise: (e: Exercise) => void;
+  duplicateRoutine: (id: string) => void;
   deleteRoutine: (id: string) => Routine | undefined;
   restoreRoutine: (r: Routine) => void;
   saveRoutine: (r: Routine) => void;
@@ -43,10 +50,12 @@ export const useWorkout = create<WorkoutState>()(
   persist(
     (set, get) => ({
       routines: seedRoutines,
+      customExercises: [],
       active: null,
       restEndsAt: null,
       history: [],
       points: {},
+      lastSets: {},
       streak: 3,
       lastUndo: null,
       lastSummary: null,
@@ -65,6 +74,17 @@ export const useWorkout = create<WorkoutState>()(
             })),
           },
         });
+      },
+
+      // Entreno rápido: se llega aquí al escanear una máquina (REPARTO.md §2.1). Si ya hay entreno, se añade el ejercicio.
+      startQuick: (exerciseId) => {
+        const a = get().active;
+        const newItem: ActiveExercise = { exerciseId, restSec: 90, sets: Array.from({ length: 3 }, () => ({ weight: 20, reps: 10, done: false })) };
+        if (a) {
+          if (!a.items.some((i) => i.exerciseId === exerciseId)) set({ active: { ...a, items: [...a.items, newItem] } });
+          return;
+        }
+        set({ restEndsAt: null, lastUndo: null, rankedUp: null, active: { routineId: 'quick', name: 'Entreno rápido', startedAt: Date.now(), items: [newItem] } });
       },
 
       toggleSet: (ex, si) => {
@@ -109,10 +129,15 @@ export const useWorkout = create<WorkoutState>()(
       skipRest: () => set({ restEndsAt: null }),
 
       finish: () => {
-        const { active: a, history, points, streak } = get(); if (!a) return null;
+        const { active: a, history, points, streak, lastSets } = get(); if (!a) return null;
+        const newLast = { ...lastSets };
         let volume = 0, sets = 0, gained = 0;
         const newPoints = { ...points };
         let rankedUp: { from: string; to: string } | null = null;
+        for (const it of a.items) {
+          const done = it.sets.filter((x) => x.done).map((x) => ({ weight: x.weight, reps: x.reps }));
+          if (done.length) newLast[it.exerciseId] = { date: Date.now(), sets: done };
+        }
         for (const it of a.items) for (const s of it.sets) if (s.done) {
           volume += s.weight * s.reps; sets++;
           const p = pointsFor(s.weight, s.reps);
@@ -126,12 +151,17 @@ export const useWorkout = create<WorkoutState>()(
           id: String(Date.now()), name: a.name, date: Date.now(),
           durationMin: Math.max(1, Math.round((Date.now() - a.startedAt) / 60000)), volume: Math.round(volume), sets, points: gained,
         };
-        set({ active: null, restEndsAt: null, history: [rec, ...history], points: newPoints, streak: streak + 1, lastSummary: rec, rankedUp });
+        set({ active: null, restEndsAt: null, history: [rec, ...history], points: newPoints, lastSets: newLast, streak: streak + 1, lastSummary: rec, rankedUp });
         return rec;
       },
 
       discard: () => set({ active: null, restEndsAt: null }),
 
+      addCustomExercise: (e) => { registerExercise(e); set({ customExercises: [...get().customExercises, e] }); },
+      duplicateRoutine: (id) => {
+        const r = get().routines.find((x) => x.id === id); if (!r) return;
+        set({ routines: [...get().routines, { ...r, id: `r${Date.now()}`, name: `${r.name} (copia)`, days: [], exercises: r.exercises.map((e) => ({ ...e })) }] });
+      },
       deleteRoutine: (id) => {
         const r = get().routines.find((x) => x.id === id);
         set({ routines: get().routines.filter((x) => x.id !== id) });
@@ -145,7 +175,15 @@ export const useWorkout = create<WorkoutState>()(
     }),
     {
       name: 'gv-workout', storage: createJSONStorage(() => AsyncStorage),
-      partialize: (s) => ({ routines: s.routines, history: s.history, points: s.points, streak: s.streak, active: s.active, restEndsAt: s.restEndsAt }),
+      // v1: las rutinas pasan de `day` (texto) a `days` (array de 0..6). Se normalizan las guardadas con el formato antiguo.
+      version: 1,
+      migrate: (persisted, version) => {
+        const s = persisted as Partial<WorkoutState>;
+        if (version < 1) s.routines = (s.routines ?? seedRoutines).map((r) => ({ ...r, days: Array.isArray(r.days) ? r.days : [] }));
+        return s as WorkoutState;
+      },
+      onRehydrateStorage: () => (state) => { state?.customExercises.forEach(registerExercise); },
+      partialize: (s) => ({ routines: s.routines, customExercises: s.customExercises, history: s.history, points: s.points, lastSets: s.lastSets, streak: s.streak, active: s.active, restEndsAt: s.restEndsAt }),
     },
   ),
 );

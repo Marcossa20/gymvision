@@ -2,13 +2,13 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertTriangle, Bell, CheckCircle2, Info, ScanLine, Timer, Trophy } from 'lucide-react-native';
+import { AlertTriangle, Bell, CheckCircle2, Info, LockOpen, ScanLine, Timer, Trophy } from 'lucide-react-native';
 import { useAlerts, type AlertKind } from '../services/alerts';
 import { useTheme } from '../theme/useTheme';
 import { T } from './ui';
 
 const icons: Record<AlertKind, typeof Bell> = {
-  serie: CheckCircle2, descanso: Timer, rango: Trophy, cardio: Bell, qr: ScanLine, error: AlertTriangle, info: Info,
+  serie: CheckCircle2, descanso: Timer, rango: Trophy, cardio: Bell, qr: ScanLine, taquilla: LockOpen, error: AlertTriangle, info: Info,
 };
 
 export function AlertBanner() {

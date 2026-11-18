@@ -7,6 +7,8 @@ export type ColorBlindMode = 'none' | 'protanopia' | 'deuteranopia' | 'tritanopi
 export interface Palette {
   bg: string;
   card: string;
+  /** Superficie secundaria: mosaicos de icono, chips y botones sobre tarjeta (Figma #222228). */
+  surface2: string;
   brand: string;
   onBrand: string;
   textPrimary: string;
@@ -22,6 +24,7 @@ export interface Palette {
 export const dark: Palette = {
   bg: '#0B0B0D',
   card: '#18181C',
+  surface2: '#222228',
   brand: '#30E2CA',
   onBrand: '#0B0B0D',
   textPrimary: '#FFFFFF',
@@ -37,6 +40,7 @@ export const dark: Palette = {
 export const light: Palette = {
   bg: '#F4F4F6',
   card: '#FFFFFF',
+  surface2: '#E6E6EC',
   brand: '#0B7A6D',
   onBrand: '#FFFFFF',
   textPrimary: '#0B0B0D',

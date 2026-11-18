@@ -44,6 +44,10 @@ export const hapticSubidaRango = () =>
 export const hapticCardio = () =>
   run([0, 50, 100, 50], () => iosPulses(2, 100, Haptics.ImpactFeedbackStyle.Light));
 
+/** Taquilla abierta: 2 pulsos medios (distinto del QR leído, que es 1 corto). */
+export const hapticTaquilla = () =>
+  run([0, 100, 100, 100], () => iosPulses(2, 100, Haptics.ImpactFeedbackStyle.Medium));
+
 /** Error / acción no válida: 1 pulso largo (~300 ms). */
 export const hapticError = () =>
   run([0, 300], () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error));
