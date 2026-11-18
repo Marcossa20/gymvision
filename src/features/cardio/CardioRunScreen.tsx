@@ -14,6 +14,7 @@ import { exerciseById } from '../../data/seed';
 import { notify } from '../../services/alerts';
 import { useStepCounter } from '../../services/accelerometer';
 import { useCardio } from '../../store/cardio';
+import { useProfile } from '../../store/profile';
 import { useTheme } from '../../theme/useTheme';
 import { alpha } from '../gym/ui';
 import { cardioKind, cardioPointsFor, computeMetrics, goalProgress, type CardioGoal } from './catalog';
@@ -62,6 +63,7 @@ export function CardioRunScreen() {
   const [finished, setFinished] = useState(false);
   const goalNotified = useRef(false);
   const setPending = useCardio((s) => s.setPending);
+  const heightCm = useProfile((s) => s.heightCm);
 
   const counter = useStepCounter({
     onWalkingChange: (w) => notify('cardio', w ? 'Movimiento detectado · cronómetro en marcha' : 'Sin movimiento · cronómetro en pausa'),
@@ -79,7 +81,7 @@ export function CardioRunScreen() {
   useEffect(() => { if (!kind.usesSteps) notify('cardio', `${exercise.name} · cronómetro en marcha`); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeMs = kind.usesSteps ? counter.activeMs : manualMs;
-  const m = computeMetrics(kind, activeMs, counter.steps);
+  const m = computeMetrics(kind, activeMs, counter.steps, heightCm);
   const progress = goalProgress(goal, target, m);
 
   useEffect(() => {

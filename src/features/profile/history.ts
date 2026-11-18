@@ -75,13 +75,13 @@ export function useHistory(): HistoryItem[] {
   const demo = useRanksDemo((s) => s.demo);
   return useMemo(() => {
     if (demo) return demoHistory(Date.now());
-    // Récord (aprox.): entreno con más volumen que todos los anteriores.
-    const sorted = [...history].sort((a, b) => a.date - b.date);
-    let best = 0;
-    const rec = new Map<string, number>();
-    for (const h of sorted) { rec.set(h.id, h.volume > best && best > 0 ? 1 : 0); best = Math.max(best, h.volume); }
+    // Músculos y récords vienen del propio entreno (store de Entrenar); los entrenos antiguos usan la rutina como respaldo.
     return history
-      .map((h) => ({ id: h.id, name: h.name, date: h.date, durationMin: h.durationMin, volume: h.volume, sets: h.sets, muscles: musclesFor(h.name), records: rec.get(h.id) ?? 0 }))
+      .map((h) => ({
+        id: h.id, name: h.name, date: h.date, durationMin: h.durationMin, volume: h.volume, sets: h.sets,
+        muscles: h.muscles?.length ? h.muscles.map((m) => m.muscle) : musclesFor(h.name),
+        records: h.records?.length ?? 0,
+      }))
       .sort((a, b) => b.date - a.date);
   }, [history, demo]);
 }

@@ -1,5 +1,5 @@
 // Datos de cada tipo de cardio: si usa el acelerómetro (pasos), imagen, y estimaciones simples
-// de distancia/calorías. TODO: afinar con altura/peso del perfil (zancada ≈ 0,415 × altura).
+// de distancia/calorías. La zancada sale de la altura del perfil (caminar ≈ 0,415 × altura; correr ≈ 0,62 × altura).
 import type { ImageSourcePropType } from 'react-native';
 
 export type CardioGoal = 'time' | 'steps' | 'distance';
@@ -11,8 +11,8 @@ export interface CardioKind {
   image: ImageSourcePropType;
   /** Miniatura en «Cardio · Resumen». */
   thumb: ImageSourcePropType;
-  /** Zancada (m) para pasar pasos a distancia. */
-  strideM?: number;
+  /** Zancada como fracción de la altura, para pasar pasos a distancia. */
+  strideFactor?: number;
   /** Velocidad media estimada (km/h) para los que no cuentan pasos. */
   speedKmh?: number;
   /** kcal por minuto activo (aprox.). */
@@ -31,8 +31,8 @@ const img = {
 
 export const CARDIO: Record<string, CardioKind> = {
   // En Figma «Caminata · En curso» muestra la cinta (caminar en el gimnasio) y el resumen la silueta andando.
-  caminata: { usesSteps: true, image: img.cinta, thumb: img.caminata, strideM: 0.75, kcalPerMin: 5.9 },
-  correr: { usesSteps: true, image: img.correr, thumb: img.correr, strideM: 1.05, kcalPerMin: 11 },
+  caminata: { usesSteps: true, image: img.cinta, thumb: img.caminata, strideFactor: 0.415, kcalPerMin: 5.9 },
+  correr: { usesSteps: true, image: img.correr, thumb: img.correr, strideFactor: 0.62, kcalPerMin: 11 },
   bicicleta: { usesSteps: false, image: img.bicicleta, thumb: img.bicicleta, speedKmh: 20, kcalPerMin: 8 },
   eliptica: { usesSteps: false, image: img.eliptica, thumb: img.eliptica, speedKmh: 8, kcalPerMin: 9 },
   'remo-cardio': { usesSteps: false, image: img.remo, thumb: img.remo, speedKmh: 10, kcalPerMin: 9 },
@@ -48,9 +48,9 @@ export interface CardioMetrics {
   kcal: number;
 }
 
-export function computeMetrics(kind: CardioKind, activeMs: number, steps: number): CardioMetrics {
+export function computeMetrics(kind: CardioKind, activeMs: number, steps: number, heightCm = 170): CardioMetrics {
   const min = activeMs / 60000;
-  const distanceKm = kind.usesSteps ? (steps * (kind.strideM ?? 0.75)) / 1000 : ((kind.speedKmh ?? 0) * min) / 60;
+  const distanceKm = kind.usesSteps ? (steps * (heightCm / 100) * (kind.strideFactor ?? 0.415)) / 1000 : ((kind.speedKmh ?? 0) * min) / 60;
   return { activeMs, steps, distanceKm, kcal: Math.round(min * kind.kcalPerMin) };
 }
 

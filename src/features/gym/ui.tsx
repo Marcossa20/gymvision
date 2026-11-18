@@ -34,8 +34,7 @@ export function ScreenBar({ title, icon = 'close', onBack }: { title: string; ic
 /** Cuadrado con icono (56 por defecto) — mosaico de las tarjetas. */
 export function IconTile({ children, size = 56, radius = 16 }: { children: React.ReactNode; size?: number; radius?: number }) {
   const { colors } = useTheme();
-  // TODO(issue [para A]): token de superficie secundaria (#222228 en Figma); de momento divider.
-  return <View style={{ width: size, height: size, borderRadius: radius, backgroundColor: colors.divider, alignItems: 'center', justifyContent: 'center' }}>{children}</View>;
+  return <View style={{ width: size, height: size, borderRadius: radius, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>{children}</View>;
 }
 
 /** Zona inferior fija para los botones principales. */
