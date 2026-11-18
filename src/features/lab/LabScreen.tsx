@@ -239,6 +239,12 @@ export function LabScreen() {
         <QrLab />
         <NfcLab />
         <AccelLab />
+        {/* Atajos al cardio mientras A no tenga el lanzador en Rutinas (contrato §2.2) */}
+        <Section icon={<Footprints size={22} color={colors.brand} />} title="Cardio" subtitle="Abre /cardio/run como lo hará Rutinas">
+          <Button label="Caminata · objetivo 5.000 pasos" onPress={() => router.push('/cardio/run?exerciseId=caminata&goal=steps&target=5000' as never)} />
+          <Button variant="secondary" label="Correr · sin objetivo" onPress={() => router.push('/cardio/run?exerciseId=correr' as never)} />
+          <Button variant="secondary" label="Bicicleta · objetivo 30 min" onPress={() => router.push('/cardio/run?exerciseId=bicicleta&goal=time&target=30' as never)} />
+        </Section>
       </ScrollView>
     </SafeAreaView>
   );
