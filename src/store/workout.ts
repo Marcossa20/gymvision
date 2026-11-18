@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { exerciseById, registerExercise, routines as seedRoutines, type Exercise, type Muscle, type Routine } from '../data/seed';
+import i18n from 'i18next';
 import { notify } from '../services/alerts';
 import { pointsFor, rankFromPoints } from '../domain/ranks';
 
@@ -108,7 +109,7 @@ export const useWorkout = create<WorkoutState>()(
         const done = !s.done;
         const items = a.items.map((it, i) => i !== ex ? it : { ...it, sets: it.sets.map((x, j) => j === si ? { ...x, done } : x) });
         set({ active: { ...a, items }, restEndsAt: done ? Date.now() + item.restSec * 1000 : get().restEndsAt });
-        if (done) notify('serie', `Serie guardada · ${s.weight} kg × ${s.reps}`);
+        if (done) notify('serie', i18n.t('Serie guardada · {{w}} kg × {{r}}', { w: s.weight, r: s.reps }));
       },
 
       setWeight: (ex, si, weight) => patchSet(set, get, ex, si, { weight: Math.max(0, Math.round(weight * 2) / 2) }),
@@ -127,7 +128,7 @@ export const useWorkout = create<WorkoutState>()(
           active: { ...a, items: a.items.map((it, i) => i === ex ? { ...it, sets: it.sets.filter((_, j) => j !== si) } : it) },
           lastUndo: { exIndex: ex, setIndex: si, set: removed },
         });
-        notify('info', 'Serie eliminada', { actionLabel: 'Deshacer', onAction: () => get().undoRemove(), ms: 5000 });
+        notify('info', i18n.t('Serie eliminada'), { actionLabel: i18n.t('Deshacer'), onAction: () => get().undoRemove(), ms: 5000 });
       },
 
       undoRemove: () => {

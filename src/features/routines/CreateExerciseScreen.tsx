@@ -9,12 +9,14 @@ import { notify } from '../../services/alerts';
 import { useWorkout } from '../../store/workout';
 import { useTheme } from '../../theme/useTheme';
 import { muscleImages } from '../workout/muscleImages';
-import { equipmentImages, equipmentLabels, muscleLabel } from './Thumb';
+import { equipmentImages, equipmentLabels, equipLabel, muscleLabel } from './Thumb';
+import { useTranslation } from 'react-i18next';
 
 const MUSCLES = Object.keys(muscleImages) as Muscle[];
 const EQUIPMENT = Object.keys(equipmentLabels) as Equipment[];
 
 export function CreateExerciseScreen() {
+  const { t } = useTranslation();
   const { colors, highContrast } = useTheme();
   const router = useRouter();
   const add = useWorkout((s) => s.addCustomExercise);
@@ -25,37 +27,37 @@ export function CreateExerciseScreen() {
   const cardio = equip === 'cardio';
 
   const submit = () => {
-    if (!name.trim()) return notify('error', 'Ponle un nombre al ejercicio');
-    if (!equip) return notify('error', 'Elige el equipamiento');
-    if (!cardio && muscles.length === 0) return notify('error', 'Elige al menos un músculo');
+    if (!name.trim()) return notify('error', t('Ponle un nombre al ejercicio'));
+    if (!equip) return notify('error', t('Elige el equipamiento'));
+    if (!cardio && muscles.length === 0) return notify('error', t('Elige al menos un músculo'));
     add({ id: `custom-${Date.now()}`, name: name.trim(), muscles: cardio ? [] : muscles, equipment: equip, type: cardio ? 'cardio' : 'fuerza' });
-    notify('info', 'Ejercicio creado');
+    notify('info', t('Ejercicio creado'));
     router.back();
   };
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ height: 56, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Volver" onPress={() => router.back()} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}><ChevronLeft size={28} color={colors.textPrimary} /></Pressable>
-        <T size={18} weight="600" accessibilityRole="header" style={{ flex: 1, textAlign: 'center' }}>Crear ejercicio</T>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Volver')} onPress={() => router.back()} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}><ChevronLeft size={28} color={colors.textPrimary} /></Pressable>
+        <T size={18} weight="600" accessibilityRole="header" style={{ flex: 1, textAlign: 'center' }}>{t('Crear ejercicio')}</T>
         <View style={{ width: 48 }} />
       </View>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120, gap: 18 }}>
         <View style={{ gap: 8 }}>
-          <T size={14} weight="500" color="secondary">Nombre del ejercicio</T>
-          <TextInput accessibilityLabel="Nombre del ejercicio" value={name} onChangeText={setName} maxLength={60} placeholder="Ej. Remo en máquina Hammer" placeholderTextColor={colors.radioOff}
+          <T size={14} weight="500" color="secondary">{t('Nombre del ejercicio')}</T>
+          <TextInput accessibilityLabel={t('Nombre del ejercicio')} value={name} onChangeText={setName} maxLength={60} placeholder={t('Ej. Remo en máquina Hammer')} placeholderTextColor={colors.radioOff}
             style={[{ height: 56, borderRadius: 16, backgroundColor: colors.card, paddingHorizontal: 16, fontSize: 16, fontFamily: 'Inter_500Medium', color: colors.textPrimary }, border]} />
         </View>
         <View style={{ gap: 8 }}>
-          <T size={14} weight="500" color="secondary">Equipamiento</T>
+          <T size={14} weight="500" color="secondary">{t('Equipamiento')}</T>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {EQUIPMENT.map((q) => {
               const on = equip === q;
               return (
-                <Pressable key={q} accessibilityRole="radio" accessibilityState={{ selected: on }} accessibilityLabel={equipmentLabels[q]} onPress={() => setEquip(q)}
+                <Pressable key={q} accessibilityRole="radio" accessibilityState={{ selected: on }} accessibilityLabel={equipLabel(q)} onPress={() => setEquip(q)}
                   style={{ minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 10, borderRadius: 14, borderWidth: on ? 2 : 1, borderColor: on ? colors.brand : colors.divider, backgroundColor: colors.card }}>
                   <Image source={equipmentImages[q]} style={{ width: 32, height: 32, borderRadius: 8 }} accessibilityIgnoresInvertColors />
-                  <T size={14} weight={on ? '700' : '500'}>{equipmentLabels[q]}</T>
+                  <T size={14} weight={on ? '700' : '500'}>{equipLabel(q)}</T>
                 </Pressable>
               );
             })}
@@ -63,7 +65,7 @@ export function CreateExerciseScreen() {
         </View>
         {!cardio ? (
           <View style={{ gap: 8 }}>
-            <T size={14} weight="500" color="secondary">Músculos que trabaja</T>
+            <T size={14} weight="500" color="secondary">{t('Músculos que trabaja')}</T>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {MUSCLES.map((m) => {
                 const on = muscles.includes(m);
@@ -79,7 +81,7 @@ export function CreateExerciseScreen() {
         ) : null}
       </ScrollView>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingBottom: 24, paddingTop: 12, backgroundColor: colors.bg }}>
-        <Button label="Crear ejercicio" onPress={submit} />
+        <Button label={t('Crear ejercicio')} onPress={submit} />
       </View>
     </SafeAreaView>
   );

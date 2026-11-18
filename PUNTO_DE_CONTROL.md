@@ -45,3 +45,8 @@
 - `Routine` usa `days: number[]` (0 = lunes) y los ejercicios pueden llevar `goal`/`target` (cardio). Guardado local con migración.
 - `assets/equipment/cardio.jpg` muestra un torso, no algo de cardio: revisar.
 - Modelo: Sonnet 5.5 vale para casi todo; Opus si fallan reordenar con el dedo, notificaciones, acelerómetro o NFC.
+
+## Traducciones (rama `marcos/traducciones`, SIN mezclar ni probar en móvil)
+- Infraestructura i18next: la clave es el texto en español; el inglés está en `src/i18n/en.json` (323 claves). `src/i18n/index.ts` sigue el ajuste de idioma.
+- Traducidas mis pantallas (Entrenar, entreno, resumen, rutinas, ajustes), avisos, notificaciones, fechas y nombres de ejercicios/rutinas de ejemplo.
+- Falta: probar en el iPhone (cambiar a English en Ajustes → Idioma), mezclar, y que Miguel Ángel traduzca sus pantallas (gym, cardio, rangos, perfil, auth) con el mismo patrón `t('texto')`. fr/de/it/pt se muestran en inglés.

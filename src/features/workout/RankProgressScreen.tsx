@@ -10,12 +10,14 @@ import { Button, Card, T } from '../../components/ui';
 import { nextRankLabel, rankFromPoints } from '../../domain/ranks';
 import { notify } from '../../services/alerts';
 import { Bar, RankBadge } from '../ranks/RankBits';
-import { MUSCLE_LABELS } from '../ranks/muscles';
+import { muscleLabel } from '../routines/Thumb';
 import { useWorkout } from '../../store/workout';
 import { useTheme } from '../../theme/useTheme';
 import { muscleImages } from './muscleImages';
+import { useTranslation } from 'react-i18next';
 
 export function RankProgressScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const d = useWorkout((s) => s.lastSummary?.rankDelta);
@@ -28,7 +30,7 @@ export function RankProgressScreen() {
   const scale = useSharedValue(0.6);
   useEffect(() => {
     scale.value = withDelay(150, withSpring(1, { damping: 8, stiffness: 120 }));
-    if (rankedUp && after) notify('rango', `¡Subes a ${after.label}!`);
+    if (rankedUp && after) notify('rango', t('¡Subes a {{rank}}!', { rank: after.label }));
   }, [rankedUp, after, scale]);
   const badgeStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
@@ -40,19 +42,19 @@ export function RankProgressScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 12, gap: 18, alignItems: 'center', flexGrow: 1 }}>
         <View style={{ height: 30 }} />
-        <T size={13} weight="700" color="brand" accessibilityRole="header">TU PROGRESO · ENTRENO DE HOY</T>
+        <T size={13} weight="700" color="brand" accessibilityRole="header">{t('TU PROGRESO · ENTRENO DE HOY')}</T>
 
         {d && after ? (
           <>
             <View style={{ width: 84, height: 84, borderRadius: 24, overflow: 'hidden', backgroundColor: '#070707' }}>
               <Image source={muscleImages[d.muscle]} style={{ width: 84, height: 84 }} resizeMode="cover" accessibilityIgnoresInvertColors />
             </View>
-            <T size={34} weight="700">{MUSCLE_LABELS[d.muscle]}</T>
+            <T size={34} weight="700">{muscleLabel(d.muscle)}</T>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
               <View style={{ alignItems: 'center', gap: 6 }}>
                 <RankBadge rank={before} size={110} />
-                <T size={14} weight="500" color="secondary">{before ? before.label : 'Sin rango'}</T>
+                <T size={14} weight="500" color="secondary">{before ? before.label : t('Sin rango')}</T>
               </View>
               <ArrowRight size={28} color={colors.brand} />
               <Animated.View style={[{ alignItems: 'center', gap: 6 }, badgeStyle]}>
@@ -62,21 +64,21 @@ export function RankProgressScreen() {
             </View>
 
             <Card style={{ alignSelf: 'stretch', borderRadius: 22, padding: 16, gap: 8 }}>
-              <T size={13} weight="500" color="secondary">{next ? `Para subir a ${next}` : 'Has alcanzado el rango máximo'}</T>
+              <T size={13} weight="500" color="secondary">{next ? t('Para subir a {{rank}}', { rank: next }) : t('Has alcanzado el rango máximo')}</T>
               <T size={44} weight="700" color="brand">{`${pct} %`}</T>
               <Bar progress={after.progress} color={colors.brand} height={8} />
-              <T size={13} color="secondary">{`${next ? `Te falta un ${100 - pct} % para subir de rango · ` : ''}hoy has sumado +${gained} %`}</T>
+              <T size={13} color="secondary">{(next ? t('Te falta un {{left}} % para subir de rango · ', { left: 100 - pct }) : '') + t('hoy has sumado +{{n}} %', { n: gained })}</T>
             </Card>
           </>
         ) : (
           <Card style={{ alignSelf: 'stretch', borderRadius: 22, padding: 20, gap: 8, marginTop: 24 }}>
-            <T size={18} weight="700">Hoy no ha cambiado ningún rango</T>
-            <T size={14} color="secondary">Sube peso o repeticiones en tus ejercicios para avanzar hacia el siguiente rango.</T>
+            <T size={18} weight="700">{t('Hoy no ha cambiado ningún rango')}</T>
+            <T size={14} color="secondary">{t('Sube peso o repeticiones en tus ejercicios para avanzar hacia el siguiente rango.')}</T>
           </Card>
         )}
 
         <View style={{ flex: 1, minHeight: 12 }} />
-        <Button label="Continuar" style={{ alignSelf: 'stretch' }} onPress={() => router.replace('/entrenar')} />
+        <Button label={t('Continuar')} style={{ alignSelf: 'stretch' }} onPress={() => router.replace('/entrenar')} />
       </ScrollView>
     </SafeAreaView>
   );

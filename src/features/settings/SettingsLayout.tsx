@@ -5,14 +5,16 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { Card, T } from '../../components/ui';
 import { useTheme } from '../../theme/useTheme';
+import { useTranslation } from 'react-i18next';
 
 export function SettingsScreen({ title, children }: { title: string; children: React.ReactNode }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, minHeight: 56 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Volver" onPress={() => (router.canGoBack() ? router.back() : router.replace('/entrenar'))} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Volver')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/entrenar'))} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
           <ArrowLeft size={24} color={colors.textPrimary} />
         </Pressable>
         <T size={18} weight="700" accessibilityRole="header" style={{ flex: 1, textAlign: 'center' }}>{title}</T>

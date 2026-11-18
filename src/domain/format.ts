@@ -1,3 +1,4 @@
+import i18n from 'i18next';
 // Formatos en español: decimales con coma (27,5 kg) y tiempos mm:ss.
 export const fmtNum = (n: number) => String(Math.round(n * 10) / 10).replace('.', ',');
 export const fmtClock = (totalSec: number) => {
@@ -14,4 +15,7 @@ export const fmtThousands = (n: number) => String(Math.round(n)).replace(/\B(?=(
 const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 /** «viernes 16 de octubre» */
-export const fmtDateLong = (ts: number) => { const d = new Date(ts); return `${DAYS[d.getDay()]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`; };
+export const fmtDateLong = (ts: number) => {
+  const d = new Date(ts);
+  return i18n.t('{{day}} {{d}} de {{month}}', { day: i18n.t(DAYS[d.getDay()]), d: d.getDate(), month: i18n.t(MONTHS[d.getMonth()]) });
+};
