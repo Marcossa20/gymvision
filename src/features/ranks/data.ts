@@ -4,6 +4,8 @@
 // sin tener que entrenar antes. Vive en un store propio de B.
 import { useMemo } from 'react';
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { exercises, type Exercise, type Muscle } from '../../data/seed';
 import { rankFromPoints, type Rank } from '../../domain/ranks';
 import { useWorkout } from '../../store/workout';
@@ -17,16 +19,25 @@ export const MUSCLE_GROUPS: { id: string; name: string; muscles: Muscle[] }[] = 
   { id: 'hombros', name: 'Hombros', muscles: ['hombros'] },
 ];
 
-/** Puntos de ejemplo por músculo (parecidos a los del Figma). */
+/**
+ * Datos de demostración: como si la app se llevara usando un mes. Valores elegidos para que los rangos
+ * coincidan con el Figma (general Oro III al 72 %, Brazos Diamante II, Pecho Esmeralda I, Espalda Oro III,
+ * Piernas Rubí I, Hombros Plata III).
+ */
 const DEMO_MUSCLE_POINTS: Partial<Record<Muscle, number>> = {
-  biceps: 8300, triceps: 6900, pecho: 5300, hombros: 1500, dorsales: 3600, trapecio: 2500, lumbar: 3100,
-  cuadriceps: 2750, gluteos: 3000, femoral: 800, gemelos: 7000, abdominales: 4700,
+  biceps: 8700, triceps: 7000, pecho: 4934, hombros: 1200, dorsales: 2900, trapecio: 2500, lumbar: 2400,
+  cuadriceps: 3200, gluteos: 2900, gemelos: 2900, abdominales: 4700,
 };
+const DEMO_GENERAL_POINTS = 2560; // Oro III · 72 % hacia Rubí
+const DEMO_FACTOR = [1, 0.62, 0.8, 0.5, 0.72]; // varía el rango de cada ejercicio dentro de un mismo músculo
 
-export const useRanksDemo = create<{ demo: boolean; toggle: () => void }>((set) => ({
-  demo: false,
-  toggle: () => set((s) => ({ demo: !s.demo })),
-}));
+/** Modo demostración: activado por defecto para poder presentar la app; se desactiva en el Laboratorio. */
+export const useRanksDemo = create<{ demo: boolean; toggle: () => void }>()(
+  persist(
+    (set) => ({ demo: true, toggle: () => set((s) => ({ demo: !s.demo })) }),
+    { name: 'gv-demo', storage: createJSONStorage(() => AsyncStorage), partialize: (s) => ({ demo: s.demo }) },
+  ),
+);
 
 export interface MuscleRank { muscle: Muscle; points: number; rank: Rank | null }
 
@@ -39,10 +50,11 @@ export function useExercisePoints(): Record<string, number> {
   return useMemo(() => {
     if (!demo) return real;
     const out: Record<string, number> = {};
-    for (const e of exercises) {
+    exercises.forEach((e, i) => {
       const ps = e.muscles.map((m) => DEMO_MUSCLE_POINTS[m] ?? 0);
-      if (ps.length) out[e.id] = Math.max(...ps);
-    }
+      const best = ps.length ? Math.max(...ps) : 0;
+      if (best) out[e.id] = Math.round(best * DEMO_FACTOR[i % DEMO_FACTOR.length]);
+    });
     return out;
   }, [real, demo]);
 }
@@ -71,7 +83,7 @@ export function useMuscleRanks() {
       rank: rankOrNull(avg(g.muscles)),
       ranked: g.muscles.filter((m) => byMuscle[m].rank).length,
     }));
-    const general = rankOrNull(avg([...all]));
+    const general = rankOrNull(demo ? DEMO_GENERAL_POINTS : avg([...all]));
     return { byMuscle, groups, general, points };
   }, [points, demo]);
 }
