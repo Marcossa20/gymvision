@@ -229,8 +229,8 @@ function DemoRanks() {
   const demo = useRanksDemo((s) => s.demo);
   const toggle = useRanksDemo((s) => s.toggle);
   return (
-    <Section icon={<Activity size={22} color={colors.brand} />} title="Rangos de demostración" subtitle={demo ? 'Activados: Rangos muestra datos de ejemplo' : 'Desactivados: Rangos usa tus datos reales'}>
-      <Button variant={demo ? 'secondary' : 'primary'} label={demo ? 'Usar datos reales' : 'Cargar rangos de ejemplo'} onPress={toggle} />
+    <Section icon={<Activity size={22} color={colors.brand} />} title="Datos de demostración" subtitle={demo ? 'Activados: Rangos y Perfil muestran datos de ejemplo' : 'Desactivados: se usan tus datos reales'}>
+      <Button variant={demo ? 'secondary' : 'primary'} label={demo ? 'Usar datos reales' : 'Cargar datos de ejemplo'} onPress={toggle} />
     </Section>
   );
 }
