@@ -48,6 +48,12 @@
         {
           "nfcPermission": "GymVision usa NFC para abrir tu taquilla al acercar el móvil a la cerradura."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "GymVision usa tus fotos solo para tu foto de perfil, que se guarda en el móvil."
+        }
       ]
     ],
     "scheme": "gymvision",

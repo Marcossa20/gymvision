@@ -1,14 +1,3 @@
-// STUB: pantalla "Rangos" — la implementa Miguel Ángel (B), ver REPARTO.md. Sustituir este archivo entero.
-import { View } from 'react-native';
-import { T } from '../../components/ui';
-import { useTheme } from '../../theme/useTheme';
+import { RanksScreen } from '../../features/ranks/RanksScreen';
 
-export default function Screen() {
-  const { colors } = useTheme();
-  return (
-    <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>
-      <T size={20} weight="600">Rangos</T>
-      <T size={14} color="secondary">Pendiente (B)</T>
-    </View>
-  );
-}
+export default RanksScreen;
