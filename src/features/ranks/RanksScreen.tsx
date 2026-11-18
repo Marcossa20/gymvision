@@ -50,11 +50,12 @@ export function RanksScreen() {
 
         {/* Mapa muscular */}
         <Card style={{ paddingHorizontal: 18, paddingTop: 16, paddingBottom: 18, gap: 16, borderRadius: 20 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', columnGap: 12, rowGap: 2 }}>
             <T size={15} weight="700" accessibilityRole="header">Mapa muscular · por rango</T>
             <T size={12} weight="500" color="secondary">Toca un músculo</T>
           </View>
           <BodyMap ranks={byMuscle} onPress={goMuscle} />
+          {!general ? <T size={12.5} color="secondary" style={{ textAlign: 'center' }}>Aún sin rangos: entrena, o activa «Cargar datos de ejemplo» en el Laboratorio.</T> : null}
         </Card>
 
         <View style={{ paddingTop: 20, paddingBottom: 12 }}>

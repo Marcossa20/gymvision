@@ -2,6 +2,7 @@
 // Interacción de proximidad = gesto físico natural, sin menús ni teclear (menos carga cognitiva).
 // Plan B obligatorio: simulateLockTag() para demostrar el flujo sin etiqueta NFC o en móviles sin NFC.
 import { Platform } from 'react-native';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import type NfcManagerType from 'react-native-nfc-manager';
 import type { NfcTech as NfcTechType, Ndef as NdefType, TagEvent } from 'react-native-nfc-manager';
 
@@ -10,6 +11,8 @@ type NfcModule = { default: typeof NfcManagerType; NfcTech: typeof NfcTechType; 
 let mod: NfcModule | null | undefined;
 function nfc(): NfcModule | null {
   if (mod !== undefined) return mod;
+  // En Expo Go el módulo nativo no existe y la librería lanza al cargarse: ni se intenta.
+  if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) return (mod = null);
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     mod = require('react-native-nfc-manager') as NfcModule;

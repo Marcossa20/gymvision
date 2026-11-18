@@ -84,3 +84,13 @@ export const textScaleLabels = ['Normal', 'Grande', 'Muy grande', 'Máximo'];
 
 export const radius = { card: 16, button: 14, chip: 999 };
 export const minTouch = 48; // RNF1: objetivos táctiles ≥ 48 dp
+
+// Color de marca / acentos de la interfaz según el modo de daltonismo (Reto 1).
+// El turquesa original se sustituye por un color que la persona distingue bien del gris y del resto de la interfaz:
+// protanopia → azul, deuteranopia → ámbar, tritanopia → rosa. Contraste ≥ 5,4:1 (AA) sobre cada fondo y con el texto encima.
+export type ThemeVariant = 'dark' | 'light' | 'darkHC' | 'lightHC';
+export const brandByMode: Record<Exclude<ColorBlindMode, 'none'>, Record<ThemeVariant, string>> = {
+  protanopia: { dark: '#5BB8FF', light: '#0B5C9E', darkHC: '#7CC8FF', lightHC: '#07457A' },
+  deuteranopia: { dark: '#FFB000', light: '#8A5A00', darkHC: '#FFC233', lightHC: '#6B4500' },
+  tritanopia: { dark: '#FF7A9C', light: '#B3123F', darkHC: '#FF94B0', lightHC: '#8F0C32' },
+};
