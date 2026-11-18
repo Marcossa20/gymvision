@@ -37,7 +37,7 @@ export function Wheel({ value, step, min = 0, onChange, label, active, suffix, w
 
   if (!active) {
     return (
-      <View style={{ width, height: 48, borderRadius: 14, backgroundColor: colors.card === '#18181C' ? '#222228' : colors.divider, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width, height: 48, borderRadius: 14, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
         <T size={22} weight="700" color="secondary">{format(value)}</T>
       </View>
     );
@@ -48,7 +48,7 @@ export function Wheel({ value, step, min = 0, onChange, label, active, suffix, w
       accessible accessibilityRole="adjustable" accessibilityLabel={label} accessibilityValue={{ text: `${format(value)}${suffix ?? ''}` }}
       accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
       onAccessibilityAction={(e) => onChange(Math.max(min, value + (e.nativeEvent.actionName === 'increment' ? step : -step)))}
-      style={{ width, height, borderRadius: 16, borderWidth: 1.5, borderColor: colors.brand, backgroundColor: '#222228', alignItems: 'center', justifyContent: 'center', gap: 6, overflow: 'hidden' }}
+      style={{ width, height, borderRadius: 16, borderWidth: 1.5, borderColor: colors.brand, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center', gap: 6, overflow: 'hidden' }}
     >
       <T size={15} weight="500" color={colors.radioOff} style={{ opacity: 0.7 }}>{format(next)}</T>
       <T size={valueSize} weight="700" color="#FFFFFF">{format(value)}</T>

@@ -82,7 +82,7 @@ export function ActiveWorkoutScreen() {
           </View>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Iniciar descanso" onPress={() => useWorkout.setState({ restEndsAt: Date.now() + item.restSec * 1000 })} style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#222228', alignItems: 'center', justifyContent: 'center' }}><Timer size={24} color={colors.textPrimary} /></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Iniciar descanso" onPress={() => useWorkout.setState({ restEndsAt: Date.now() + item.restSec * 1000 })} style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}><Timer size={24} color={colors.textPrimary} /></Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel="Terminar entreno" onPress={() => setConfirm(true)} style={{ height: 48, paddingHorizontal: 20, borderRadius: 14, borderWidth: 1.5, borderColor: colors.radioOff, alignItems: 'center', justifyContent: 'center' }}>
             <T size={15} weight="600">Terminar</T>
           </Pressable>
@@ -113,7 +113,7 @@ export function ActiveWorkoutScreen() {
 
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {[{ l: 'Tutorial', I: Play }, { l: 'Reemplazar', I: Repeat }, { l: 'Notas', I: Pencil }].map(({ l, I }) => (
-            <Pressable key={l} accessibilityRole="button" accessibilityLabel={l} onPress={() => notify('info', `${l}: próximamente`)} style={{ flex: 1, minHeight: 48, borderRadius: 22, backgroundColor: '#222228', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Pressable key={l} accessibilityRole="button" accessibilityLabel={l} onPress={() => notify('info', `${l}: próximamente`)} style={{ flex: 1, minHeight: 48, borderRadius: 22, backgroundColor: colors.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               <I size={16} color={colors.textPrimary} /><T size={13} weight="500">{l}</T>
             </Pressable>
           ))}
@@ -132,7 +132,7 @@ export function ActiveWorkoutScreen() {
             return (
               <SetRow key={i} index={i} ex={exIndex} selected={isCur} onToggle={() => toggleSet(exIndex, i)} onRemove={() => removeSet(exIndex, i)}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 8, borderRadius: 20, backgroundColor: isCur ? colors.card : 'transparent', borderWidth: isCur ? 2 : 0, borderColor: colors.brand }}>
-                  <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isCur ? colors.brand : '#222228', alignItems: 'center', justifyContent: 'center' }}>
+                  <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isCur ? colors.brand : colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
                     <T size={15} weight="700" color={isCur ? colors.onBrand : colors.textPrimary}>{i + 1}</T>
                   </View>
                   <T size={13} color="secondary" numberOfLines={1} style={{ flex: 1, textAlign: 'center' }}>{`${fmtNum(s.weight)}×${s.reps}`}</T>
@@ -141,14 +141,14 @@ export function ActiveWorkoutScreen() {
                   <Pressable
                     accessibilityRole="checkbox" accessibilityState={{ checked: s.done }} accessibilityLabel={`Completar serie ${i + 1}`}
                     onPress={() => toggleSet(exIndex, i)}
-                    style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: s.done ? colors.brand : isCur ? 'transparent' : '#222228', borderWidth: isCur && !s.done ? 2 : 0, borderColor: colors.brand }}>
+                    style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: s.done ? colors.brand : isCur ? 'transparent' : colors.surface2, borderWidth: isCur && !s.done ? 2 : 0, borderColor: colors.brand }}>
                     <Check size={24} color={s.done ? colors.onBrand : isCur ? colors.brand : colors.radioOff} strokeWidth={3} />
                   </Pressable>
                 </View>
               </SetRow>
             );
           })}
-          <Pressable accessibilityRole="button" accessibilityLabel="Añadir serie" onPress={() => addSet(exIndex)} style={{ height: 48, borderRadius: 16, backgroundColor: '#222228', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Añadir serie" onPress={() => addSet(exIndex)} style={{ height: 48, borderRadius: 16, backgroundColor: colors.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <Plus size={20} color={colors.brand} /><T size={15} weight="600" color="brand">Añadir serie</T>
           </Pressable>
         </View>
@@ -162,7 +162,7 @@ export function ActiveWorkoutScreen() {
               <T size={28} weight="700" numberOfLines={1}>{fmtClock(remaining)}</T>
             </View>
             {[-15, 15].map((d) => (
-              <Pressable key={d} accessibilityRole="button" accessibilityLabel={`${d > 0 ? 'Añadir' : 'Quitar'} 15 segundos`} onPress={() => adjustRest(d)} style={{ minHeight: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: '#222228', alignItems: 'center', justifyContent: 'center' }}>
+              <Pressable key={d} accessibilityRole="button" accessibilityLabel={`${d > 0 ? 'Añadir' : 'Quitar'} 15 segundos`} onPress={() => adjustRest(d)} style={{ minHeight: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
                 <T size={15} weight="600">{d > 0 ? '+15 s' : '−15 s'}</T>
               </Pressable>
             ))}

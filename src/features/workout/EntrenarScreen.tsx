@@ -65,7 +65,7 @@ export function EntrenarScreen() {
                   <Image key={m} source={muscleImages[m]} accessibilityLabel={m} style={{ width: 95, height: 170, borderRadius: 14 }} resizeMode="cover" />
                 ))}
                 {r.days.length ? (
-                  <View style={{ position: 'absolute', left: 16, top: 16, backgroundColor: '#222228', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 }}>
+                  <View style={{ position: 'absolute', left: 16, top: 16, backgroundColor: colors.surface2, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 }}>
                     <T size={13} weight="500" color="#FFFFFF">{WEEK_NAMES[r.days[0]]}</T>
                   </View>
                 ) : null}
@@ -87,7 +87,7 @@ export function EntrenarScreen() {
         <T size={16} weight="500" color="secondary" style={{ textAlign: 'center' }}>¿Buscas otra forma de entrenar?</T>
 
         <Card onPress={() => router.push('/routines')} accessibilityLabel="Ir a mis rutinas. Consulta tus rutinas guardadas" style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 20, minHeight: 76 }}>
-          <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#222228', alignItems: 'center', justifyContent: 'center' }}><Library size={24} color={colors.brand} /></View>
+          <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}><Library size={24} color={colors.brand} /></View>
           <View style={{ flex: 1, gap: 2 }}>
             <T size={16} weight="600">Ir a mis rutinas</T>
             <T size={13} color="secondary">Consulta tus rutinas guardadas</T>
@@ -96,7 +96,7 @@ export function EntrenarScreen() {
         </Card>
 
         <Card onPress={() => router.push('/routines/edit/new')} accessibilityLabel="Crea tu rutina" style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 20, minHeight: 76, borderColor: colors.brand, borderWidth: 1.5 }}>
-          <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#222228', alignItems: 'center', justifyContent: 'center' }}><Plus size={24} color={colors.brand} /></View>
+          <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}><Plus size={24} color={colors.brand} /></View>
           <T size={16} weight="600" style={{ flex: 1 }}>Crea tu rutina</T>
           <ChevronRight size={22} color={colors.textSecondary} />
         </Card>

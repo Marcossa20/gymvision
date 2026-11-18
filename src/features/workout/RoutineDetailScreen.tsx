@@ -62,7 +62,7 @@ export function RoutineDetailScreen() {
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <T size={20} weight="700">{`${routine.exercises.length} ejercicios`}</T>
-          <Pressable accessibilityRole="button" accessibilityLabel="Añadir ejercicio" onPress={() => router.push({ pathname: '/routines/add', params: { routineId: routine.id, save: '1' } })} style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#222228', alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Añadir ejercicio" onPress={() => router.push({ pathname: '/routines/add', params: { routineId: routine.id, save: '1' } })} style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
             <Plus size={22} color={colors.textPrimary} />
           </Pressable>
         </View>

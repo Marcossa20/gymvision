@@ -10,6 +10,7 @@ import { pointsFor, rankFromPoints } from '../domain/ranks';
 export interface SetItem { weight: number; reps: number; done: boolean }
 export interface ActiveExercise { exerciseId: string; restSec: number; sets: SetItem[] }
 export interface ActiveWorkout { routineId: string; name: string; startedAt: number; items: ActiveExercise[] }
+export interface LastSets { date: number; sets: { weight: number; reps: number }[] }
 export interface WorkoutRecord { id: string; name: string; date: number; durationMin: number; volume: number; sets: number; points: number }
 
 interface WorkoutState {
@@ -19,6 +20,8 @@ interface WorkoutState {
   restEndsAt: number | null;
   history: WorkoutRecord[];
   points: Record<string, number>; // puntos por ejercicio → rango
+  /** Últimas series completadas por ejercicio («Última vez: 32 kg × 12 · hace 2 días · 3 series»). */
+  lastSets: Record<string, LastSets>;
   streak: number;
   lastUndo: { exIndex: number; setIndex: number; set: SetItem } | null;
   lastSummary: WorkoutRecord | null;
@@ -52,6 +55,7 @@ export const useWorkout = create<WorkoutState>()(
       restEndsAt: null,
       history: [],
       points: {},
+      lastSets: {},
       streak: 3,
       lastUndo: null,
       lastSummary: null,
@@ -125,10 +129,15 @@ export const useWorkout = create<WorkoutState>()(
       skipRest: () => set({ restEndsAt: null }),
 
       finish: () => {
-        const { active: a, history, points, streak } = get(); if (!a) return null;
+        const { active: a, history, points, streak, lastSets } = get(); if (!a) return null;
+        const newLast = { ...lastSets };
         let volume = 0, sets = 0, gained = 0;
         const newPoints = { ...points };
         let rankedUp: { from: string; to: string } | null = null;
+        for (const it of a.items) {
+          const done = it.sets.filter((x) => x.done).map((x) => ({ weight: x.weight, reps: x.reps }));
+          if (done.length) newLast[it.exerciseId] = { date: Date.now(), sets: done };
+        }
         for (const it of a.items) for (const s of it.sets) if (s.done) {
           volume += s.weight * s.reps; sets++;
           const p = pointsFor(s.weight, s.reps);
@@ -142,7 +151,7 @@ export const useWorkout = create<WorkoutState>()(
           id: String(Date.now()), name: a.name, date: Date.now(),
           durationMin: Math.max(1, Math.round((Date.now() - a.startedAt) / 60000)), volume: Math.round(volume), sets, points: gained,
         };
-        set({ active: null, restEndsAt: null, history: [rec, ...history], points: newPoints, streak: streak + 1, lastSummary: rec, rankedUp });
+        set({ active: null, restEndsAt: null, history: [rec, ...history], points: newPoints, lastSets: newLast, streak: streak + 1, lastSummary: rec, rankedUp });
         return rec;
       },
 
@@ -174,7 +183,7 @@ export const useWorkout = create<WorkoutState>()(
         return s as WorkoutState;
       },
       onRehydrateStorage: () => (state) => { state?.customExercises.forEach(registerExercise); },
-      partialize: (s) => ({ routines: s.routines, customExercises: s.customExercises, history: s.history, points: s.points, streak: s.streak, active: s.active, restEndsAt: s.restEndsAt }),
+      partialize: (s) => ({ routines: s.routines, customExercises: s.customExercises, history: s.history, points: s.points, lastSets: s.lastSets, streak: s.streak, active: s.active, restEndsAt: s.restEndsAt }),
     },
   ),
 );
