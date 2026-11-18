@@ -58,7 +58,7 @@ export function AccessibilityScreen() {
 
       <Section label="ACCESIBILIDAD">
         <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
-          <Block icon={icon(Eye)} title="Modo daltonismo" desc="Adapta los colores de rangos y gráficas" />
+          <Block icon={icon(Eye)} title="Modo daltonismo" desc="Adapta los colores de la interfaz, rangos y gráficas" />
         </View>
         {modes.map((m) => {
           const sel = s.colorBlind === m.id;

@@ -54,7 +54,8 @@
         {
           "photosPermission": "GymVision usa tus fotos solo para tu foto de perfil, que se guarda en el móvil."
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "scheme": "gymvision",
     "newArchEnabled": true

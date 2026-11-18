@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { useSettings } from '../store/settings';
 import { hapticCardio, hapticError, hapticFinDescanso, hapticQrLeido, hapticSerieGuardada, hapticSubidaRango, hapticTaquilla } from './haptics';
+import { playSound } from './sounds';
 
 export type AlertKind = 'serie' | 'descanso' | 'rango' | 'cardio' | 'qr' | 'taquilla' | 'error' | 'info';
 
@@ -35,5 +36,5 @@ const haptic: Record<AlertKind, () => void> = {
 export function notify(kind: AlertKind, message: string, opts?: { actionLabel?: string; onAction?: () => void; ms?: number }) {
   haptic[kind]();
   if (useSettings.getState().visualAlerts) useAlerts.getState().show(kind, message, opts);
-  // TODO: sonido opcional (settings.sound) con expo-audio cuando se añada el asset.
+  playSound(kind); // opcional: solo suena si Ajustes → Notificaciones → Sonido está activado
 }
