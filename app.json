@@ -8,7 +8,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "es.uclm.gymvision"
+      "bundleIdentifier": "es.uclm.gymvision",
+      "infoPlist": {
+        "NSMotionUsageDescription": "GymVision usa el acelerómetro para contar tus pasos en cardio."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -36,10 +39,16 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "GymVision usa la c\u00e1mara para leer el QR de las m\u00e1quinas."
+          "cameraPermission": "GymVision usa la cámara para leer el QR de las máquinas."
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "GymVision usa NFC para abrir tu taquilla al acercar el móvil a la cerradura."
+        }
+      ]
     ],
     "scheme": "gymvision",
     "newArchEnabled": true
