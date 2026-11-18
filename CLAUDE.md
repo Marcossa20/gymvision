@@ -170,7 +170,7 @@ kg (por defecto) / lb. Decimales con coma en español (27,5 kg). Formato de fech
 
 ## 7. Accesibilidad — daltonismo (reglas de implementación)
 
-Ajustes → Accesibilidad → «Modo daltonismo: adapta los colores de rangos y gráficas»: **Ninguno / Protanopia / Deuteranopia / Tritanopia**. **Solo cambia la paleta de los datos (rangos, mapa de calor, gráficas), NO el color de marca de la interfaz.** Cada modo cambia la paleta; el resto se queda igual.
+Ajustes → Accesibilidad → «Modo daltonismo: adapta los colores de rangos y gráficas»: **Ninguno / Protanopia / Deuteranopia / Tritanopia**. **Cambia la paleta de los datos (rangos, mapa de calor, gráficas) y también el color de marca de la interfaz** (turquesa → azul en Protanopia, ámbar en Deuteranopia, rosa en Tritanopia; ver `brandByMode` en `src/theme/tokens.ts`, contraste ≥ 5,4:1). Decisión del equipo (nov 2026): antes solo cambiaba la paleta de datos.
 
 Paletas de rangos (Bronce, Plata, Oro, Rubí, Esmeralda, Diamante) — **versión v2, validada con test de distancia de color**:
 - **Ninguno:** `#9B6A39 #B2B8C2 #E4A826 #D23A4E #1FA85C #2E7CE0`

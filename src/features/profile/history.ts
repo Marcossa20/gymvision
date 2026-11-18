@@ -48,7 +48,8 @@ function demoHistory(now: number): HistoryItem[] {
       pick('Elevaciones laterales en polea baja', 'hombros', [[10, 15], [10, 14], [12, 12]]),
     ] },
   ];
-  const offsets = [0, 2, 4, 6, 9, 11, 13, 16, 18, 21, 24, 27, 30, 34, 38, 41, 45, 52, 60, 67, 75, 90, 110, 130];
+  // 24 entrenos en algo más de un mes (4–5 por semana), el último hoy.
+  const offsets = [0, 1, 2, 4, 5, 7, 8, 9, 11, 12, 14, 15, 16, 18, 19, 21, 22, 23, 25, 26, 28, 29, 32, 34];
   return offsets.map((d, i) => {
     const t = templates[i % templates.length];
     const scale = 1 - i * 0.008;
