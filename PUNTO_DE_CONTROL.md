@@ -22,17 +22,24 @@
   - Wifi de la universidad: usar `--tunnel` o el punto de acceso del iPhone (con el PC conectado a él, sin cable).
   - **Problema pendiente:** Expo Go muestra «You need to be signed in to Expo Go and Expo CLI». Solución: cerrar sesión en Expo Go **o** ejecutar `npx expo login` en el PC con la misma cuenta.
 
-## Pendiente (mi parte), por orden
-1. **Probar en el iPhone** (resolver el aviso de inicio de sesión) y corregir lo que falle.
-2. ~~Abrir PR~~ **abierto: PR #12** (`marcos/entreno-en-curso` → `main`, sin conflictos, cierra #2, #4, #5 y #10). **Falta decidir la mezcla** y avisar a Miguel Ángel.
-3. **Revisar los PR de Miguel Ángel** (sin revisar el código): #9 acceso, #3 gimnasio, #6 cardio, #7 rangos, #8 perfil. Orden sugerido: #12 → #9 → #3, #6, #7, #8; esperar conflictos menores en `package.json`/`package-lock.json` (regenerar con `npm install`). Hay que rehacer el development build por `expo-brightness` y `qrcode`. Issue nueva `[para B]` para `deleteAccount()`.
-4. Acceso a Ajustes: hoy solo por la ruta `/settings`; cuando B termine Perfil, el engranaje la enlazará.
-5. ~~Cuenta y seguridad~~ **hecha** (issue #10): cerrar sesión, cambiar contraseña (reutiliza `requestReset` + `/auth/new-password`) y permisos. Usa `features/settings/authApi.ts`, tolerante al stub; falta `deleteAccount()` en el store de B. Pendiente: Widget/pantalla de bloqueo (nativo; simulado).
-6. i18n con `i18next` (es + en; hoy todo está en español y el ajuste de idioma solo guarda la elección).
-7. Pantallas sin leer del Figma: Crear ejercicio, Mis rutinas vacío, Resultados Cardio. «Reemplazar», «Tutorial» y «Notas» del entreno solo muestran un aviso de «próximamente».
+## Estado de integración
+- `main` ya contiene **todo**: mi parte (PR #12) y la de Miguel Ángel (PR #3, #6, #7, #8, #9, integrados con el #13). Revisado: sin red, sin secretos reales, no toca archivos de A. Typecheck ✓ y `expo export` Android ✓.
+- Issue abierta: #11 `[para B]` `deleteAccount()`.
 
-## Notas y avisos
-- `Routine` cambió: ahora `days: number[]` (0 = lunes) en lugar de `day`; los ejercicios pueden llevar `goal` y `target` (cardio). El guardado local tiene migración (versión 1).
-- Contratos con B (ver `REPARTO.md` §2): `/workout/machine/<exerciseId>` y `/cardio/run?exerciseId=&goal=&target=`.
-- `assets/equipment/cardio.jpg` muestra un torso, no algo de cardio: revisar si se subió mal.
-- Modelo: Sonnet 5.5 vale para casi todo; subir a Opus si falla el reordenar con el dedo, las notificaciones o el acelerómetro/NFC (B).
+## Cómo probar en el iPhone
+- `expo-dev-client` está instalado (lo añadió el laboratorio), así que `npx expo start` arranca **en modo development build**. Para Expo Go: pulsar `s` en la terminal.
+- Sigue pendiente el aviso «signed in to Expo Go and Expo CLI»: cerrar sesión en Expo Go o `npx expo login`.
+- NFC real y `expo-brightness` necesitan development build (en Expo Go hay botón «Simular cerradura»).
+
+## Pendiente, por orden
+1. Probar todo en el iPhone y corregir (vibración, gestos, reordenar, notificaciones, cámara QR, pasos).
+2. i18n con `i18next` (es + en; hoy todo en español).
+3. Widget / pantalla de bloqueo (nativo; simulado).
+4. Pantallas sin leer del Figma: Crear ejercicio, Mis rutinas vacío, Resultados Cardio; «Reemplazar», «Tutorial» y «Notas» del entreno son avisos.
+5. Revisión final de accesibilidad con lector de pantalla y prueba en Android.
+
+## Notas
+- Cuenta de demostración fija en `store/auth.ts` (miguel@correo.com): vale para la exposición; el hash es una simulación, no seguridad real.
+- `Routine` usa `days: number[]` (0 = lunes) y los ejercicios pueden llevar `goal`/`target` (cardio). Guardado local con migración.
+- `assets/equipment/cardio.jpg` muestra un torso, no algo de cardio: revisar.
+- Modelo: Sonnet 5.5 vale para casi todo; Opus si fallan reordenar con el dedo, notificaciones, acelerómetro o NFC.
