@@ -35,3 +35,10 @@ export function rankFromPoints(points: number): Rank {
   const level = ((step % 3) + 1) as 1 | 2 | 3;
   return { tier, level, progress: Math.min(1, Math.max(0, progress)), label: `${RANK_NAMES[tier]} ${ROMAN[level - 1]}` };
 }
+
+/** Nombre del siguiente escalón («Diamante III») o null si ya está en el máximo. */
+export function nextRankLabel(rank: Rank): string | null {
+  const step = rank.tier * 3 + (rank.level - 1) + 1;
+  if (step >= STEPS) return null;
+  return `${RANK_NAMES[Math.floor(step / 3)]} ${ROMAN[step % 3]}`;
+}

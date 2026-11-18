@@ -15,6 +15,7 @@ import { radius } from '../../theme/tokens';
 import { createScanGuard, lookupMachine, machineRoute } from '../../services/qr';
 import { cancelNfc, getNfcStatus, readLockTag, simulateLockTag, type LockTag, type NfcStatus } from '../../services/nfc';
 import { useStepCounter } from '../../services/accelerometer';
+import { useRanksDemo } from '../ranks/data';
 // TODO(issue [para A]): cuando exista un AlertKind propio para la taquilla, usarlo aquí en lugar de 'qr'.
 const LOCKER_ALERT: AlertKind = 'qr';
 
@@ -222,6 +223,18 @@ function AccelLab() {
   );
 }
 
+/** Datos de ejemplo para enseñar el mapa muscular y los modos de daltonismo (Reto 1) sin entrenar antes. */
+function DemoRanks() {
+  const { colors } = useTheme();
+  const demo = useRanksDemo((s) => s.demo);
+  const toggle = useRanksDemo((s) => s.toggle);
+  return (
+    <Section icon={<Activity size={22} color={colors.brand} />} title="Datos de demostración" subtitle={demo ? 'Activados: Rangos y Perfil muestran datos de ejemplo' : 'Desactivados: se usan tus datos reales'}>
+      <Button variant={demo ? 'secondary' : 'primary'} label={demo ? 'Usar datos reales' : 'Cargar datos de ejemplo'} onPress={toggle} />
+    </Section>
+  );
+}
+
 export function LabScreen() {
   const { colors } = useTheme();
   const router = useRouter();
@@ -239,6 +252,13 @@ export function LabScreen() {
         <QrLab />
         <NfcLab />
         <AccelLab />
+        <DemoRanks />
+        {/* Atajos al cardio mientras A no tenga el lanzador en Rutinas (contrato §2.2) */}
+        <Section icon={<Footprints size={22} color={colors.brand} />} title="Cardio" subtitle="Abre /cardio/run como lo hará Rutinas">
+          <Button label="Caminata · objetivo 5.000 pasos" onPress={() => router.push('/cardio/run?exerciseId=caminata&goal=steps&target=5000' as never)} />
+          <Button variant="secondary" label="Correr · sin objetivo" onPress={() => router.push('/cardio/run?exerciseId=correr' as never)} />
+          <Button variant="secondary" label="Bicicleta · objetivo 30 min" onPress={() => router.push('/cardio/run?exerciseId=bicicleta&goal=time&target=30' as never)} />
+        </Section>
       </ScrollView>
     </SafeAreaView>
   );
