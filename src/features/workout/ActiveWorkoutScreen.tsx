@@ -12,6 +12,7 @@ import { notify } from '../../services/alerts';
 import { useWorkout } from '../../store/workout';
 import { useTheme } from '../../theme/useTheme';
 import { muscleImages } from './muscleImages';
+import { ScrollLockContext } from './scrollLock';
 import { Wheel } from './Wheel';
 
 function useNow(intervalMs = 1000) {
@@ -47,6 +48,7 @@ export function ActiveWorkoutScreen() {
   const { toggleSet, setWeight, setReps, addSet, removeSet, adjustRest, skipRest, finish, discard } = useWorkout.getState();
   const now = useNow();
   const [exIndex, setExIndex] = useState(0);
+  const [scrollLocked, setScrollLocked] = useState(false);
   const [confirm, setConfirm] = useState(false);
 
   // El aviso de fin de descanso lo gestiona services/notifications.ts (funciona aunque salgas de esta pantalla).
@@ -82,7 +84,8 @@ export function ActiveWorkoutScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: restEndsAt ? 150 : 40, gap: 14 }}>
+      <ScrollLockContext.Provider value={setScrollLocked}>
+      <ScrollView scrollEnabled={!scrollLocked} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: restEndsAt ? 150 : 40, gap: 14 }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, padding: 3 }}>
           {a.items.map((it, i) => {
             const m = exerciseById(it.exerciseId).muscles[0];
@@ -146,6 +149,7 @@ export function ActiveWorkoutScreen() {
           </Pressable>
         </View>
       </ScrollView>
+      </ScrollLockContext.Provider>
 
       {restEndsAt ? (
         <View accessibilityLiveRegion="polite" style={{ position: 'absolute', left: 20, right: 20, bottom: 24, backgroundColor: colors.card, borderRadius: 20, borderWidth: 1.5, borderColor: 'rgba(48,226,202,0.5)', paddingHorizontal: 14, paddingVertical: 12, gap: 8 }}>

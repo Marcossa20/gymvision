@@ -6,6 +6,7 @@ import { fmtNum } from '../../domain/format';
 import { hapticTick } from '../../services/haptics';
 import { T } from '../../components/ui';
 import { useTheme } from '../../theme/useTheme';
+import { useScrollLock } from './scrollLock';
 
 export function Wheel({ value, step, min = 0, onChange, label, active, suffix, width = 76, height = 96, valueSize = 26, format = fmtNum }: {
   value: number; step: number; min?: number; onChange: (v: number) => void; label: string; active?: boolean; suffix?: string;
@@ -16,14 +17,21 @@ export function Wheel({ value, step, min = 0, onChange, label, active, suffix, w
   const latest = useRef({ value, onChange });
   latest.current = { value, onChange };
   const last = useRef(0);
+  const lock = useRef(useScrollLock());
+  lock.current = useScrollLock();
 
   const pan = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 6 && Math.abs(g.dy) > Math.abs(g.dx),
-      onPanResponderGrant: () => { base.current = latest.current.value; last.current = 0; },
+      // La rueda se queda con el gesto desde que se toca y no lo suelta (ni al ScrollView ni al sistema).
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderTerminationRequest: () => false,
+      onShouldBlockNativeResponder: () => true,
+      onPanResponderGrant: () => { base.current = latest.current.value; last.current = 0; lock.current(true); },
+      onPanResponderRelease: () => lock.current(false),
+      onPanResponderTerminate: () => lock.current(false),
       onPanResponderMove: (_, g) => {
-        const steps = Math.round(-g.dy / 22); // arriba = subir
+        const steps = Math.round(-g.dy / 18); // arriba = subir
         if (steps !== last.current) {
           last.current = steps;
           const next = Math.max(min, base.current + steps * step);
