@@ -48,17 +48,8 @@ export function ActiveWorkoutScreen() {
   const now = useNow();
   const [exIndex, setExIndex] = useState(0);
   const [confirm, setConfirm] = useState(false);
-  const notified = useRef<number | null>(null);
 
-  // Fin del descanso: vibración + aviso visual (Reto 3), una sola vez por descanso.
-  useEffect(() => {
-    if (restEndsAt && now >= restEndsAt && notified.current !== restEndsAt) {
-      notified.current = restEndsAt;
-      notify('descanso', 'Descanso terminado · empieza la siguiente serie');
-      skipRest();
-    }
-  }, [now, restEndsAt, skipRest]);
-
+  // El aviso de fin de descanso lo gestiona services/notifications.ts (funciona aunque salgas de esta pantalla).
   useEffect(() => { if (!a) router.replace('/entrenar'); }, [a, router]);
   if (!a) return null;
 

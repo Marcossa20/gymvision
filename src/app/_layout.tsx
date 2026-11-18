@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,11 +8,13 @@ import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_7
 import { useTheme } from '../theme/useTheme';
 import { useAuth } from '../store/auth';
 import { AlertBanner } from '../components/AlertBanner';
+import { initNotifications } from '../services/notifications';
 
 export default function RootLayout() {
   const { colors, isDark } = useTheme();
   const loggedIn = useAuth((s) => s.loggedIn);
   const segments = useSegments();
+  useEffect(() => { void initNotifications(); }, []);
   const [fontsLoaded] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold });
 
   if (!fontsLoaded) {
