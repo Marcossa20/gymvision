@@ -24,8 +24,8 @@
 
 ## Pendiente (mi parte), por orden
 1. **Probar en el iPhone** (resolver el aviso de inicio de sesión) y corregir lo que falle.
-2. **Abrir PR** `marcos/entreno-en-curso` → `main` con `Closes #2, #4, #5` y mezclarlo; avisar a Miguel Ángel.
-3. **Revisar su PR #3** (Mi gimnasio): sin conflictos aparentes, sin revisar el código. Añade `expo-brightness` y `qrcode` (hay que rehacer el development build).
+2. ~~Abrir PR~~ **abierto: PR #12** (`marcos/entreno-en-curso` → `main`, sin conflictos, cierra #2, #4, #5 y #10). **Falta decidir la mezcla** y avisar a Miguel Ángel.
+3. **Revisar los PR de Miguel Ángel** (sin revisar el código): #9 acceso, #3 gimnasio, #6 cardio, #7 rangos, #8 perfil. Orden sugerido: #12 → #9 → #3, #6, #7, #8; esperar conflictos menores en `package.json`/`package-lock.json` (regenerar con `npm install`). Hay que rehacer el development build por `expo-brightness` y `qrcode`. Issue nueva `[para B]` para `deleteAccount()`.
 4. Acceso a Ajustes: hoy solo por la ruta `/settings`; cuando B termine Perfil, el engranaje la enlazará.
 5. ~~Cuenta y seguridad~~ **hecha** (issue #10): cerrar sesión, cambiar contraseña (reutiliza `requestReset` + `/auth/new-password`) y permisos. Usa `features/settings/authApi.ts`, tolerante al stub; falta `deleteAccount()` en el store de B. Pendiente: Widget/pantalla de bloqueo (nativo; simulado).
 6. i18n con `i18next` (es + en; hoy todo está en español y el ajuste de idioma solo guarda la elección).
