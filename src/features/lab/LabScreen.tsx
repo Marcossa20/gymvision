@@ -16,8 +16,6 @@ import { createScanGuard, lookupMachine, machineRoute } from '../../services/qr'
 import { cancelNfc, getNfcStatus, readLockTag, simulateLockTag, type LockTag, type NfcStatus } from '../../services/nfc';
 import { useStepCounter } from '../../services/accelerometer';
 import { useRanksDemo } from '../ranks/data';
-// TODO(issue [para A]): cuando exista un AlertKind propio para la taquilla, usarlo aquí en lugar de 'qr'.
-const LOCKER_ALERT: AlertKind = 'qr';
 
 function Section({ icon, title, subtitle, children }: { icon: React.ReactNode; title: string; subtitle: string; children: React.ReactNode }) {
   return (
@@ -41,6 +39,7 @@ const HAPTICS: { kind: AlertKind; label: string; msg: string }[] = [
   { kind: 'rango', label: 'Subida de rango', msg: '¡Subes a Oro III! · corto-corto-largo' },
   { kind: 'cardio', label: 'Inicio/fin cardio', msg: 'Cardio · 2 pulsos cortos' },
   { kind: 'qr', label: 'Código QR leído', msg: 'QR leído · 1 pulso corto' },
+  { kind: 'taquilla', label: 'Taquilla abierta', msg: 'Taquilla abierta · 2 pulsos medios' },
   { kind: 'error', label: 'Error', msg: 'Acción no válida · 1 pulso largo' },
 ];
 
@@ -144,7 +143,7 @@ function NfcLab() {
   }, []);
 
   const opened = (tag: LockTag) => {
-    notify(LOCKER_ALERT, `Taquilla ${tag.lockerId} abierta${tag.simulated ? ' (simulada)' : ''}`);
+    notify('taquilla', `Taquilla ${tag.lockerId} abierta${tag.simulated ? ' (simulada)' : ''}`);
     setMsg(`✓ Taquilla ${tag.lockerId} abierta${tag.tagId ? ` · etiqueta ${tag.tagId}` : ''}${tag.simulated ? ' · simulada' : ''}`);
   };
 

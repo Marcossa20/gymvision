@@ -59,6 +59,8 @@ interface AuthState {
   requestReset: (email: string) => void;
   setNewPassword: (password: string) => boolean;
   logout: () => void;
+  /** Borra la cuenta actual de este móvil y cierra la sesión. */
+  deleteAccount: () => void;
 }
 
 export const useAuth = create<AuthState>()(
@@ -93,6 +95,7 @@ export const useAuth = create<AuthState>()(
         return true;
       },
       logout: () => set({ loggedIn: false, currentEmail: null }),
+      deleteAccount: () => set((s) => ({ accounts: s.accounts.filter((a) => a.email !== s.currentEmail), loggedIn: false, currentEmail: null, reset: null })),
     }),
     {
       name: 'gv-auth',

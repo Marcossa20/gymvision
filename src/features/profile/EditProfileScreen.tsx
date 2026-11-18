@@ -121,7 +121,7 @@ export function EditProfileScreen() {
                       onPress={() => up({ heightCm: Math.min(230, Math.max(120, draft.heightCm + d)) })}
                       onLongPress={() => up({ heightCm: Math.min(230, Math.max(120, draft.heightCm + d * 5)) })}
                       accessibilityRole="button" accessibilityLabel={l} accessibilityHint="Mantén pulsado para 5 cm"
-                      style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.divider, alignItems: 'center', justifyContent: 'center' }}
+                      style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}
                     >
                       <Icon size={24} color={colors.textPrimary} />
                     </Pressable>

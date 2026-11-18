@@ -9,7 +9,9 @@ import { ChevronLeft, ChevronRight, Dumbbell, Target } from 'lucide-react-native
 import { Card, T } from '../../components/ui';
 import { exercises, type Muscle } from '../../data/seed';
 import { nextRankLabel } from '../../domain/ranks';
+import { useWorkout } from '../../store/workout';
 import { useTheme } from '../../theme/useTheme';
+import { fmtInt, fmtWeight } from '../profile/format';
 import { exerciseRank, useMuscleRanks, useRanksDemo } from './data';
 import { MuscleIllustration } from './MuscleIllustration';
 import { MUSCLE_LABELS } from './muscles';
@@ -32,14 +34,18 @@ export function MuscleDetailScreen() {
   const { muscle } = useLocalSearchParams<{ muscle: Muscle }>();
   const { byMuscle, points } = useMuscleRanks();
   const demo = useRanksDemo((s) => s.demo);
+  const lastSets = useWorkout((s) => s.lastSets);
+  const bestWeight = useWorkout((s) => s.bestWeight);
   if (!muscle || !(muscle in MUSCLE_LABELS)) return <Redirect href={'/rangos' as never} />;
 
   const r = byMuscle[muscle]?.rank ?? null;
   const next = r ? nextRankLabel(r) : null;
   const list = exercises.filter((e) => e.muscles.includes(muscle));
-  // TODO(issue #4 [para A]): volumen y mejor serie por músculo cuando el historial guarde series por ejercicio.
-  const volume = demo && r ? '6.240 kg' : '—';
-  const best = demo && r ? '34 kg' : '—';
+  // Datos reales: última sesión de cada ejercicio del músculo y mejor peso histórico (store de Entrenar).
+  const volumeKg = list.reduce((a, e) => a + (lastSets[e.id]?.sets.reduce((v, s) => v + s.weight * s.reps, 0) ?? 0), 0);
+  const bestKg = Math.max(0, ...list.map((e) => bestWeight[e.id] ?? 0));
+  const volume = demo && r ? '6.240 kg' : volumeKg ? `${fmtInt(volumeKg)} kg` : '—';
+  const best = demo && r ? '34 kg' : bestKg ? fmtWeight(bestKg) : '—';
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -67,7 +73,7 @@ export function MuscleDetailScreen() {
         </View>
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Stat icon={<Dumbbell size={18} color={colors.brand} />} value={volume} label="Volumen · mes" />
+          <Stat icon={<Dumbbell size={18} color={colors.brand} />} value={volume} label={demo && r ? 'Volumen · mes' : 'Volumen · última sesión'} />
           <Stat icon={<Target size={18} color={colors.brand} />} value={best} label="Mejor serie" />
         </View>
 

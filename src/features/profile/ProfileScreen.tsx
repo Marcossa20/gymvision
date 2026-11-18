@@ -26,7 +26,7 @@ export function MuscleChip({ m, size = 'sm' }: { m: Muscle; size?: 'sm' | 'md' }
   const r = byMuscle[m]?.rank;
   const md = size === 'md';
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: md ? 7 : 6, paddingLeft: md ? 11 : 9, paddingRight: md ? 12 : 10, paddingVertical: md ? 6 : 5, borderRadius: md ? 14 : 12, backgroundColor: colors.divider }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: md ? 7 : 6, paddingLeft: md ? 11 : 9, paddingRight: md ? 12 : 10, paddingVertical: md ? 6 : 5, borderRadius: md ? 14 : 12, backgroundColor: colors.surface2 }}>
       <View style={{ width: md ? 9 : 8, height: md ? 9 : 8, borderRadius: 5, backgroundColor: r ? palette[r.tier] : colors.textSecondary }} />
       <T size={md ? 13 : 12} weight="500">{MUSCLE_LABELS[m]}</T>
     </View>
@@ -36,7 +36,7 @@ export function MuscleChip({ m, size = 'sm' }: { m: Muscle; size?: 'sm' | 'md' }
 export function Avatar({ size, uri }: { size: number; uri: string | null }) {
   const { colors } = useTheme();
   return (
-    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.divider, borderWidth: 1, borderColor: colors.divider, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.divider, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
       {uri ? <Image source={{ uri }} style={{ width: size, height: size }} accessibilityIgnoresInvertColors /> : <User size={Math.round(size * 0.47)} color={colors.textSecondary} />}
     </View>
   );
@@ -84,7 +84,7 @@ function Tile({ label, value, delta }: { label: string; value: string; delta: Re
 function Segmented<V extends string>({ options, value, onChange, pill }: { options: { id: V; label: string }[]; value: V; onChange: (v: V) => void; pill?: boolean }) {
   const { colors } = useTheme();
   return (
-    <View style={[{ flexDirection: 'row', gap: pill ? 6 : 3 }, !pill && { backgroundColor: colors.divider, padding: 3, borderRadius: 12 }]} accessibilityRole="radiogroup">
+    <View style={[{ flexDirection: 'row', gap: pill ? 6 : 3 }, !pill && { backgroundColor: colors.surface2, padding: 3, borderRadius: 12 }]} accessibilityRole="radiogroup">
       {options.map((o) => {
         const on = o.id === value;
         return (
@@ -126,7 +126,7 @@ function ProgressTab({ history }: { history: HistoryItem[] }) {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <T size={30} weight="700">{metric === 'volume' ? fmtKg(s.total) : fmtInt(s.total)}</T>
             {pct !== null ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 7, paddingRight: 8, paddingVertical: 4, borderRadius: 10, backgroundColor: colors.divider }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 7, paddingRight: 8, paddingVertical: 4, borderRadius: 10, backgroundColor: colors.surface2 }}>
                 {pct >= 0 ? <ArrowUp size={12} color={colors.brand} strokeWidth={3} /> : <ArrowDown size={12} color={colors.textSecondary} strokeWidth={3} />}
                 <T size={12.5} weight="700" color={pct >= 0 ? 'brand' : 'secondary'}>{Math.abs(pct)} %</T>
               </View>
