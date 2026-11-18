@@ -4,15 +4,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Image, Modal, PanResponder, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Check, ChevronDown, Pencil, Play, Plus, Repeat, SkipForward, Timer } from 'lucide-react-native';
+import { Check, ChevronDown, Pencil, Play, Plus, Repeat, SkipForward, Timer, Trash2 } from 'lucide-react-native';
 import { Button, T } from '../../components/ui';
 import { exerciseById } from '../../data/seed';
 import { fmtClock, fmtNum } from '../../domain/format';
 import { notify } from '../../services/alerts';
+import { hapticTick } from '../../services/haptics';
 import { useWorkout } from '../../store/workout';
 import { useTheme } from '../../theme/useTheme';
 import { muscleImages } from './muscleImages';
-import { ScrollLockContext } from './scrollLock';
+import { ScrollLockContext, useScrollLock } from './scrollLock';
 import { Wheel } from './Wheel';
 
 function useNow(intervalMs = 1000) {
@@ -21,21 +22,47 @@ function useNow(intervalMs = 1000) {
   return now;
 }
 
-/** Fila de serie: se desliza hacia la izquierda para eliminar (con deshacer). */
-function SetRow({ index, ex, selected, onToggle, onRemove, children }: {
-  index: number; ex: number; selected: boolean; onToggle: () => void; onRemove: () => void; children: React.ReactNode;
+/**
+ * Fila de serie: se desliza hacia la izquierda para eliminar (con deshacer).
+ * Teoría (visibilidad del estado + RNF3): mientras se arrastra aparece detrás un fondo rojo con papelera y el texto
+ * «Eliminar» (el color nunca va solo); pasado el umbral cambia a «Suelta para eliminar» y da un toque háptico.
+ */
+const DELETE_THRESHOLD = 90;
+function SetRow({ index, ex, selected, onRemove, children }: {
+  index: number; ex: number; selected: boolean; onRemove: () => void; children: React.ReactNode;
 }) {
+  const { colors, isDark } = useTheme();
+  const lock = useScrollLock();
   const [dx, setDx] = useState(0);
   const cb = useRef(onRemove); cb.current = onRemove;
+  const lockRef = useRef(lock); lockRef.current = lock;
   const pan = useRef(PanResponder.create({
     onMoveShouldSetPanResponder: (_, g) => g.dx < -10 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+    onPanResponderGrant: () => lockRef.current(true),
     onPanResponderMove: (_, g) => setDx(Math.min(0, g.dx)),
-    onPanResponderRelease: (_, g) => { if (g.dx < -90) cb.current(); setDx(0); },
-    onPanResponderTerminate: () => setDx(0),
+    onPanResponderRelease: (_, g) => { lockRef.current(false); if (g.dx < -DELETE_THRESHOLD) cb.current(); setDx(0); },
+    onPanResponderTerminate: () => { lockRef.current(false); setDx(0); },
   })).current;
+
+  const progress = Math.min(1, -dx / DELETE_THRESHOLD);
+  const armed = -dx >= DELETE_THRESHOLD;
+  const wasArmed = useRef(false);
+  useEffect(() => { if (armed && !wasArmed.current) hapticTick(); wasArmed.current = armed; }, [armed]);
+  const onDanger = isDark ? '#0B0B0D' : '#FFFFFF';
+
   return (
-    <View {...pan.panHandlers} accessibilityHint="Desliza hacia la izquierda para eliminar la serie" style={{ transform: [{ translateX: dx }] }} key={`${ex}-${index}`}>
-      {children}
+    <View key={`${ex}-${index}`} style={{ borderRadius: 20, overflow: 'hidden' }}>
+      {dx < 0 ? (
+        <View pointerEvents="none" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: colors.danger, opacity: 0.55 + 0.45 * progress, justifyContent: 'center', alignItems: 'flex-end', paddingRight: 22 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <T size={14} weight="700" color={onDanger}>{armed ? 'Suelta para eliminar' : 'Eliminar'}</T>
+            <Trash2 size={armed ? 28 : 22} color={onDanger} />
+          </View>
+        </View>
+      ) : null}
+      <View {...pan.panHandlers} accessibilityHint="Desliza hacia la izquierda para eliminar la serie" style={{ transform: [{ translateX: dx }], backgroundColor: selected ? colors.card : colors.bg, borderRadius: 20 }}>
+        {children}
+      </View>
     </View>
   );
 }
@@ -126,7 +153,7 @@ export function ActiveWorkoutScreen() {
           {item.sets.map((s, i) => {
             const isCur = i === current;
             return (
-              <SetRow key={i} index={i} ex={exIndex} selected={isCur} onToggle={() => toggleSet(exIndex, i)} onRemove={() => removeSet(exIndex, i)}>
+              <SetRow key={i} index={i} ex={exIndex} selected={isCur} onRemove={() => removeSet(exIndex, i)}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 8, borderRadius: 20, backgroundColor: isCur ? colors.card : 'transparent', borderWidth: isCur ? 2 : 0, borderColor: colors.brand }}>
                   <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isCur ? colors.brand : colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
                     <T size={15} weight="700" color={isCur ? colors.onBrand : colors.textPrimary}>{i + 1}</T>
