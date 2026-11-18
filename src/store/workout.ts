@@ -24,6 +24,7 @@ interface WorkoutState {
   rankedUp: { from: string; to: string } | null;
 
   start: (routineId: string) => void;
+  startQuick: (exerciseId: string) => void;
   toggleSet: (ex: number, set: number) => void;
   setWeight: (ex: number, set: number, weight: number) => void;
   setReps: (ex: number, set: number, reps: number) => void;
@@ -65,6 +66,17 @@ export const useWorkout = create<WorkoutState>()(
             })),
           },
         });
+      },
+
+      // Entreno rápido: se llega aquí al escanear una máquina (REPARTO.md §2.1). Si ya hay entreno, se añade el ejercicio.
+      startQuick: (exerciseId) => {
+        const a = get().active;
+        const newItem: ActiveExercise = { exerciseId, restSec: 90, sets: Array.from({ length: 3 }, () => ({ weight: 20, reps: 10, done: false })) };
+        if (a) {
+          if (!a.items.some((i) => i.exerciseId === exerciseId)) set({ active: { ...a, items: [...a.items, newItem] } });
+          return;
+        }
+        set({ restEndsAt: null, lastUndo: null, rankedUp: null, active: { routineId: 'quick', name: 'Entreno rápido', startedAt: Date.now(), items: [newItem] } });
       },
 
       toggleSet: (ex, si) => {
