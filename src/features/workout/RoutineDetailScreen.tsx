@@ -41,7 +41,7 @@ export function RoutineDetailScreen() {
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120, gap: 20 }}>
         <View style={{ gap: 4 }}>
-          <T size={32} weight="700" accessibilityRole="header">{label(routine.name.toLowerCase())}</T>
+          <T size={32} weight="700" accessibilityRole="header">{routine.name}</T>
           <T size={16} color="secondary">{`${routine.exercises.length} ejercicios · ${estimateMinutes(routine)} min`}</T>
         </View>
 
@@ -62,7 +62,7 @@ export function RoutineDetailScreen() {
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <T size={20} weight="700">{`${routine.exercises.length} ejercicios`}</T>
-          <Pressable accessibilityRole="button" accessibilityLabel="Añadir ejercicio" onPress={() => router.push({ pathname: '/routines/add', params: { routineId: routine.id } })} style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#222228', alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Añadir ejercicio" onPress={() => router.push({ pathname: '/routines/add', params: { routineId: routine.id, save: '1' } })} style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#222228', alignItems: 'center', justifyContent: 'center' }}>
             <Plus size={22} color={colors.textPrimary} />
           </Pressable>
         </View>

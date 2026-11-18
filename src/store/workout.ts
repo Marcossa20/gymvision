@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { exerciseById, routines as seedRoutines, type Routine } from '../data/seed';
+import { exerciseById, registerExercise, routines as seedRoutines, type Exercise, type Routine } from '../data/seed';
 import { notify } from '../services/alerts';
 import { pointsFor, rankFromPoints } from '../domain/ranks';
 
@@ -14,6 +14,7 @@ export interface WorkoutRecord { id: string; name: string; date: number; duratio
 
 interface WorkoutState {
   routines: Routine[];
+  customExercises: Exercise[];
   active: ActiveWorkout | null;
   restEndsAt: number | null;
   history: WorkoutRecord[];
@@ -35,6 +36,8 @@ interface WorkoutState {
   skipRest: () => void;
   finish: () => WorkoutRecord | null;
   discard: () => void;
+  addCustomExercise: (e: Exercise) => void;
+  duplicateRoutine: (id: string) => void;
   deleteRoutine: (id: string) => Routine | undefined;
   restoreRoutine: (r: Routine) => void;
   saveRoutine: (r: Routine) => void;
@@ -44,6 +47,7 @@ export const useWorkout = create<WorkoutState>()(
   persist(
     (set, get) => ({
       routines: seedRoutines,
+      customExercises: [],
       active: null,
       restEndsAt: null,
       history: [],
@@ -144,6 +148,11 @@ export const useWorkout = create<WorkoutState>()(
 
       discard: () => set({ active: null, restEndsAt: null }),
 
+      addCustomExercise: (e) => { registerExercise(e); set({ customExercises: [...get().customExercises, e] }); },
+      duplicateRoutine: (id) => {
+        const r = get().routines.find((x) => x.id === id); if (!r) return;
+        set({ routines: [...get().routines, { ...r, id: `r${Date.now()}`, name: `${r.name} (copia)`, days: [], exercises: r.exercises.map((e) => ({ ...e })) }] });
+      },
       deleteRoutine: (id) => {
         const r = get().routines.find((x) => x.id === id);
         set({ routines: get().routines.filter((x) => x.id !== id) });
@@ -157,7 +166,15 @@ export const useWorkout = create<WorkoutState>()(
     }),
     {
       name: 'gv-workout', storage: createJSONStorage(() => AsyncStorage),
-      partialize: (s) => ({ routines: s.routines, history: s.history, points: s.points, streak: s.streak, active: s.active, restEndsAt: s.restEndsAt }),
+      // v1: las rutinas pasan de `day` (texto) a `days` (array de 0..6). Se normalizan las guardadas con el formato antiguo.
+      version: 1,
+      migrate: (persisted, version) => {
+        const s = persisted as Partial<WorkoutState>;
+        if (version < 1) s.routines = (s.routines ?? seedRoutines).map((r) => ({ ...r, days: Array.isArray(r.days) ? r.days : [] }));
+        return s as WorkoutState;
+      },
+      onRehydrateStorage: () => (state) => { state?.customExercises.forEach(registerExercise); },
+      partialize: (s) => ({ routines: s.routines, customExercises: s.customExercises, history: s.history, points: s.points, streak: s.streak, active: s.active, restEndsAt: s.restEndsAt }),
     },
   ),
 );
