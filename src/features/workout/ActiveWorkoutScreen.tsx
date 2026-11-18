@@ -50,7 +50,9 @@ export function ActiveWorkoutScreen() {
   const [confirm, setConfirm] = useState(false);
 
   // El aviso de fin de descanso lo gestiona services/notifications.ts (funciona aunque salgas de esta pantalla).
-  useEffect(() => { if (!a) router.replace('/entrenar'); }, [a, router]);
+  // Al terminar el entreno `a` pasa a null y se navega al resumen; esta redirección solo es para cuando no hay entreno.
+  const finishing = useRef(false);
+  useEffect(() => { if (!a && !finishing.current) router.replace('/entrenar'); }, [a, router]);
   if (!a) return null;
 
   const item = a.items[exIndex];
@@ -60,7 +62,7 @@ export function ActiveWorkoutScreen() {
   const totalRest = item.restSec;
   const elapsed = (now - a.startedAt) / 1000;
 
-  const done = () => { const rec = finish(); if (rec) router.replace('/workout/summary'); };
+  const done = () => { finishing.current = true; const rec = finish(); if (rec) router.replace('/workout/summary'); else finishing.current = false; };
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
