@@ -12,3 +12,4 @@ ios/
 *.key
 *.mobileprovision
 .DS_Store
+.claude/

@@ -2,9 +2,9 @@
 // Cada evento = vibración (haptics.ts) + señal visual (banner) + sonido opcional (ajuste).
 import { create } from 'zustand';
 import { useSettings } from '../store/settings';
-import { hapticCardio, hapticError, hapticFinDescanso, hapticQrLeido, hapticSerieGuardada, hapticSubidaRango } from './haptics';
+import { hapticCardio, hapticError, hapticFinDescanso, hapticQrLeido, hapticSerieGuardada, hapticSubidaRango, hapticTaquilla } from './haptics';
 
-export type AlertKind = 'serie' | 'descanso' | 'rango' | 'cardio' | 'qr' | 'error' | 'info';
+export type AlertKind = 'serie' | 'descanso' | 'rango' | 'cardio' | 'qr' | 'taquilla' | 'error' | 'info';
 
 interface AlertState {
   current: { id: number; kind: AlertKind; message: string; actionLabel?: string; onAction?: () => void } | null;
@@ -28,7 +28,7 @@ export const useAlerts = create<AlertState>((set) => ({
 
 const haptic: Record<AlertKind, () => void> = {
   serie: hapticSerieGuardada, descanso: hapticFinDescanso, rango: hapticSubidaRango,
-  cardio: hapticCardio, qr: hapticQrLeido, error: hapticError, info: () => {},
+  cardio: hapticCardio, qr: hapticQrLeido, taquilla: hapticTaquilla, error: hapticError, info: () => {},
 };
 
 /** Dispara un aviso con todos sus canales según los ajustes del usuario. */

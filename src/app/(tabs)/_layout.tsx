@@ -4,12 +4,13 @@ import { Tabs } from 'expo-router';
 import { Building2, Dumbbell, Hexagon, User } from 'lucide-react-native';
 import { useTheme } from '../../theme/useTheme';
 
-export const unstable_settings = { initialRouteName: 'entrenar' };
+export const unstable_settings = { anchor: 'entrenar' };
 
 export default function TabsLayout() {
   const { colors, fs } = useTheme();
   return (
     <Tabs
+      backBehavior="initialRoute"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.brand,

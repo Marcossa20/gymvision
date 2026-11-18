@@ -14,18 +14,25 @@ export interface Exercise {
   machineCode?: string; // código manual / QR
 }
 
+export type CardioGoal = 'time' | 'steps' | 'distance';
+
 export interface RoutineExercise {
   exerciseId: string;
   sets: number;
   reps: number;
   weight: number;
   restSec: number;
+  notes?: string;
+  /** Cardio: un único objetivo (tiempo en min | pasos | distancia en km). */
+  goal?: CardioGoal;
+  target?: number;
 }
 
 export interface Routine {
   id: string;
   name: string;
-  day?: string;
+  /** Días de entrenamiento: 0 = lunes … 6 = domingo. */
+  days: number[];
   focus: Muscle[];
   exercises: RoutineExercise[];
 }
@@ -50,13 +57,21 @@ export const exercises: Exercise[] = [
 const re = (exerciseId: string, sets = 3, reps = 10, weight = 20, restSec = 90): RoutineExercise => ({ exerciseId, sets, reps, weight, restSec });
 
 export const routines: Routine[] = [
-  { id: 'torso', name: 'TORSO', day: 'Lunes', focus: ['pecho', 'hombros', 'dorsales'],
+  { id: 'torso', name: 'Torso', days: [0, 3], focus: ['pecho', 'hombros', 'dorsales'],
     exercises: [re('press-inclinado', 4, 10, 22.5), re('pec-deck', 3, 12, 40), re('jalon-pecho', 4, 10, 50), re('remo-barra', 3, 10, 45), re('elevaciones-laterales', 3, 15, 7.5, 60)] },
-  { id: 'pierna', name: 'PIERNA', day: 'Miércoles', focus: ['cuadriceps', 'gluteos'], exercises: [re('sentadilla', 4, 8, 60, 120), re('prensa', 4, 12, 120)] },
-  { id: 'espalda-biceps', name: 'ESPALDA Y BÍCEPS', day: 'Viernes', focus: ['dorsales', 'biceps'], exercises: [re('jalon-pecho', 4, 10, 50), re('remo-barra', 3, 10, 45), re('curl-biceps', 3, 12, 12.5)] },
-  { id: 'hombros-brazos', name: 'HOMBROS Y BRAZOS', focus: ['hombros', 'triceps'], exercises: [re('elevaciones-laterales', 4, 15, 7.5, 60), re('extension-triceps', 3, 12, 25), re('curl-biceps', 3, 12, 12.5)] },
+  { id: 'pierna', name: 'Pierna', days: [1, 4], focus: ['cuadriceps', 'gluteos'], exercises: [re('sentadilla', 4, 8, 60, 120), re('prensa', 4, 12, 120)] },
+  { id: 'espalda-biceps', name: 'Espalda y bíceps', days: [2], focus: ['dorsales', 'biceps'], exercises: [re('jalon-pecho', 4, 10, 50), re('remo-barra', 3, 10, 45), re('curl-biceps', 3, 12, 12.5)] },
+  { id: 'hombros-brazos', name: 'Hombros y brazos', days: [], focus: ['hombros', 'triceps'], exercises: [re('elevaciones-laterales', 4, 15, 7.5, 60), re('extension-triceps', 3, 12, 25), re('curl-biceps', 3, 12, 12.5)] },
 ];
 
 export const exerciseById = (id: string) => exercises.find((e) => e.id === id)!;
 export const exerciseByCode = (code: string) =>
   exercises.find((e) => e.machineCode?.toLowerCase() === code.trim().toLowerCase());
+
+export const WEEK_LETTERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'] as const;
+export const WEEK_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
+
+/** Registra un ejercicio creado por el usuario en el catálogo en memoria. */
+export function registerExercise(e: Exercise) {
+  if (!exercises.some((x) => x.id === e.id)) exercises.push(e);
+}
