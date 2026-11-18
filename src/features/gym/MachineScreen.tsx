@@ -15,12 +15,26 @@ import { useTheme } from '../../theme/useTheme';
 import { MuscleIllustration } from '../ranks/MuscleIllustration';
 import { MUSCLE_LABELS } from '../ranks/muscles';
 import { rankImages } from '../ranks/rankImages';
+import { useRanksDemo } from '../ranks/data';
+import { fmtWeight } from '../profile/format';
 import { BottomActions, ScreenBar, StatusPill } from './ui';
 
-interface LastSets { weight: number; reps: number; sets: number; daysAgo: number }
-/** TODO(issue [para A]): el historial aún no guarda series por ejercicio; cuando exista, leerlo aquí. */
-function lastSetsFor(_exerciseId: string): LastSets | null {
-  return null;
+interface LastSession { weight: number; reps: number; sets: number; when: string }
+
+const when = (t: number) => {
+  const d = Math.floor((Date.now() - t) / 86400000);
+  return d <= 0 ? 'Hoy' : d === 1 ? 'Ayer' : `Hace ${d} días`;
+};
+
+/** Última sesión de ese ejercicio (historial de Entrenar) o, en modo demostración, un ejemplo como el del Figma. */
+function useLastSession(exerciseId: string): LastSession | null {
+  const last = useWorkout((s) => s.lastSets[exerciseId]);
+  const demo = useRanksDemo((s) => s.demo);
+  if (last && last.sets.length) {
+    const top = last.sets.reduce((a, b) => (b.weight > a.weight ? b : a));
+    return { weight: top.weight, reps: top.reps, sets: last.sets.length, when: when(last.date) };
+  }
+  return demo ? { weight: 32, reps: 12, sets: 3, when: 'Hace 2 días' } : null;
 }
 
 export function MachineScreen() {
@@ -36,7 +50,7 @@ export function MachineScreen() {
   const rank = points !== undefined && points > 0 ? rankFromPoints(points) : null;
   const name = ex.name.replace(/\s*\(máquina\)\s*$/i, '');
 
-  const last = lastSetsFor(ex.id);
+  const last = useLastSession(ex.id);
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -54,18 +68,18 @@ export function MachineScreen() {
             </View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {ex.muscles.map((m) => (
-                <View key={m} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: colors.divider }}>
+                <View key={m} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: colors.surface2 }}>
                   <T size={13} weight="500">{MUSCLE_LABELS[m]}</T>
                 </View>
               ))}
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: colors.divider }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: colors.surface2 }}>
               <History size={22} color={colors.brand} />
               <View style={{ flex: 1, gap: 2 }}>
                 {last ? (
                   <>
-                    <T size={15} weight="600">Última vez: {last.weight} kg × {last.reps}</T>
-                    <T size={12} color="secondary">Hace {last.daysAgo} días · {last.sets} series{rank ? ` · Rango ${RANK_NAMES[rank.tier]}` : ''}</T>
+                    <T size={15} weight="600">Última vez: {fmtWeight(last.weight)} × {last.reps}</T>
+                    <T size={12} color="secondary">{last.when} · {last.sets} series{rank ? ` · Rango ${RANK_NAMES[rank.tier]}` : ''}</T>
                   </>
                 ) : (
                   <>

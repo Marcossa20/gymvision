@@ -75,7 +75,7 @@ export function WorkoutDetailScreen() {
               return (
                 <Card key={e.name} style={{ paddingHorizontal: 14, paddingTop: 14, paddingBottom: 12, gap: 10, borderWidth: 0 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                    <View style={{ width: 52, height: 52, borderRadius: 12, backgroundColor: colors.divider, alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ width: 52, height: 52, borderRadius: 12, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
                       <Dumbbell size={26} color={colors.brand} />
                     </View>
                     <View style={{ flex: 1, gap: 3 }}>
@@ -89,12 +89,12 @@ export function WorkoutDetailScreen() {
                   </View>
                   {e.sets.map((s, i) => (
                     <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }} accessible accessibilityLabel={`Serie ${i + 1}: ${fmtWeight(s.weight)} por ${s.reps} repeticiones${s.record ? ', récord' : ''}`}>
-                      <View style={{ width: 40, height: 38, borderRadius: 10, backgroundColor: colors.divider, alignItems: 'center', justifyContent: 'center' }}>
+                      <View style={{ width: 40, height: 38, borderRadius: 10, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
                         <T size={15} weight="700">{i + 1}</T>
                       </View>
                       <T size={17} weight="600" style={{ flex: 1 }}>{fmtWeight(s.weight)} × {s.reps} reps</T>
                       {s.record ? (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingLeft: 7, paddingRight: 9, paddingVertical: 4, borderRadius: 10, borderWidth: 1, borderColor: colors.brand, backgroundColor: colors.divider }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingLeft: 7, paddingRight: 9, paddingVertical: 4, borderRadius: 10, borderWidth: 1, borderColor: colors.brand, backgroundColor: colors.surface2 }}>
                           <Trophy size={13} color={colors.brand} />
                           <T size={12} weight="700" color="brand">Récord</T>
                         </View>

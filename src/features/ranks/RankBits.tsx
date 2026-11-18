@@ -10,7 +10,7 @@ export function RankBadge({ rank, size }: { rank: Rank | null; size: number }) {
   const { colors } = useTheme();
   if (!rank) {
     return (
-      <View accessible accessibilityLabel="Sin rango" style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.divider, alignItems: 'center', justifyContent: 'center' }}>
+      <View accessible accessibilityLabel="Sin rango" style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
         <Lock size={Math.round(size * 0.45)} color={colors.textSecondary} />
       </View>
     );

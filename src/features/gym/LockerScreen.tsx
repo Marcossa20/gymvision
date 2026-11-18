@@ -9,14 +9,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Check, Lock, LockOpen, Nfc } from 'lucide-react-native';
 import { Button, T } from '../../components/ui';
-import { notify, type AlertKind } from '../../services/alerts';
+import { notify } from '../../services/alerts';
 import { cancelNfc, getNfcStatus, readLockTag, simulateLockTag, type NfcStatus } from '../../services/nfc';
 import { useTheme } from '../../theme/useTheme';
 import { useGym } from './store';
 import { alpha, BottomActions, ScreenBar } from './ui';
 
-// TODO(issue #2 [para A]): AlertKind propio para la taquilla; mientras, 1 pulso corto como «QR leído».
-const LOCKER_ALERT: AlertKind = 'qr';
 
 type Phase = 'waiting' | 'open' | 'error';
 
@@ -55,7 +53,7 @@ export function LockerScreen() {
   const opened = useCallback((simulated: boolean) => {
     setLocker('open');
     setPhase('open');
-    notify(LOCKER_ALERT, `Taquilla ${lockerNo} abierta${simulated ? ' (simulada)' : ''}`);
+    notify('taquilla', `Taquilla ${lockerNo} abierta${simulated ? ' (simulada)' : ''}`);
   }, [lockerNo, setLocker]);
 
   const read = useCallback(async () => {
