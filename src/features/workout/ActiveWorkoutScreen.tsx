@@ -109,6 +109,24 @@ export function ActiveWorkoutScreen() {
   // Al terminar el entreno `a` pasa a null y se navega al resumen; esta redirección solo es para cuando no hay entreno.
   const finishing = useRef(false);
   useEffect(() => { if (!a && !finishing.current) router.replace('/entrenar'); }, [a, router]);
+
+  // Avance automático: al terminar (o saltar) el descanso de la última serie de un ejercicio, se pasa al siguiente
+  // ejercicio pendiente. Teoría (menos pasos manuales con las manos ocupadas, RNF1); se avisa con un banner para que
+  // el cambio no sea una sorpresa (visibilidad del estado del sistema).
+  const prevRest = useRef(restEndsAt);
+  useEffect(() => {
+    const restEnded = prevRest.current !== null && restEndsAt === null;
+    prevRest.current = restEndsAt;
+    if (!restEnded || !a) return;
+    const cur = a.items[exIndex];
+    if (!cur || cur.sets.length === 0 || !cur.sets.every((x) => x.done)) return;
+    const next = a.items.findIndex((it, i) => i > exIndex && !it.sets.every((x) => x.done));
+    if (next < 0) return; // era el último ejercicio pendiente: se queda para terminar el entreno
+    setExIndex(next);
+    // Con un pequeño retraso para no pisar el aviso «Descanso terminado» (que sale justo ahora).
+    const name = exerciseById(a.items[next].exerciseId).name;
+    setTimeout(() => notify('info', `Siguiente ejercicio · ${name}`), 1800);
+  }, [restEndsAt]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!a) return null;
 
   const item = a.items[exIndex];
