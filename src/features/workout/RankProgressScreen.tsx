@@ -1,59 +1,82 @@
-// Teoría (RF8): rango con nombre + forma + barra de progreso; el color nunca va solo. Animación + háptica al subir.
+// Teoría (RF8, gamificación): el rango se muestra con insignia de forma propia + nombre + porcentaje (el color nunca va solo);
+// al subir de rango, animación + háptica + aviso visual (Reto 3).
 import React, { useEffect } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { ArrowRight } from 'lucide-react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
 import { Button, Card, T } from '../../components/ui';
-import { exerciseById } from '../../data/seed';
-import { RANK_SHAPES, rankFromPoints } from '../../domain/ranks';
+import { nextRankLabel, rankFromPoints } from '../../domain/ranks';
 import { notify } from '../../services/alerts';
+import { Bar, RankBadge } from '../ranks/RankBits';
+import { MUSCLE_LABELS } from '../ranks/muscles';
 import { useWorkout } from '../../store/workout';
-import { useRankColors, useTheme } from '../../theme/useTheme';
+import { useTheme } from '../../theme/useTheme';
+import { muscleImages } from './muscleImages';
 
 export function RankProgressScreen() {
   const { colors } = useTheme();
-  const rankColors = useRankColors();
   const router = useRouter();
-  const points = useWorkout((s) => s.points);
-  const up = useWorkout((s) => s.rankedUp);
-  const entries = Object.entries(points).sort((a, b) => b[1] - a[1]);
-  const total = entries.reduce((t, [, p]) => t + p, 0);
-  const general = rankFromPoints(Math.round(total / Math.max(1, entries.length)));
+  const d = useWorkout((s) => s.lastSummary?.rankDelta);
 
-  useEffect(() => { if (up) notify('rango', `¡Subes a ${up.to}!`); }, [up]);
+  const before = d ? (d.before > 0 ? rankFromPoints(d.before) : null) : null;
+  const after = d ? rankFromPoints(d.after) : null;
+  const rankedUp = !!after && (!before || after.label !== before.label);
 
-  const Bar = ({ tier, progress }: { tier: number; progress: number }) => (
-    <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.divider, overflow: 'hidden' }}>
-      <View style={{ height: 8, width: `${Math.round(progress * 100)}%`, backgroundColor: rankColors[tier] }} />
-    </View>
-  );
+  // Animación de la insignia nueva (entra con un muelle) y aviso al subir de rango.
+  const scale = useSharedValue(0.6);
+  useEffect(() => {
+    scale.value = withDelay(150, withSpring(1, { damping: 8, stiffness: 120 }));
+    if (rankedUp && after) notify('rango', `¡Subes a ${after.label}!`);
+  }, [rankedUp, after, scale]);
+  const badgeStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  const pct = after ? Math.round(after.progress * 100) : 0;
+  const gained = after ? (before && before.label === after.label ? Math.max(0, Math.round((after.progress - before.progress) * 100)) : pct) : 0;
+  const next = after ? nextRankLabel(after) : null;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
-        <T size={28} weight="700" accessibilityRole="header">Progreso de rango</T>
-        <Card style={{ padding: 20, gap: 10, alignItems: 'center' }}>
-          <T size={44} color={rankColors[general.tier]}>{RANK_SHAPES[general.tier]}</T>
-          <T size={26} weight="700">{general.label}</T>
-          <T size={14} color="secondary">{`${Math.round(general.progress * 100)} % hacia el siguiente rango`}</T>
-          <View style={{ alignSelf: 'stretch' }}><Bar tier={general.tier} progress={general.progress} /></View>
-        </Card>
-        <T size={18} weight="600">Por ejercicio</T>
-        {entries.length === 0 ? <T size={15} color="secondary">Completa series para conseguir tu primer rango.</T> : null}
-        {entries.map(([id, p]) => {
-          const r = rankFromPoints(p);
-          return (
-            <Card key={id} style={{ padding: 14, gap: 8 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <T size={20} color={rankColors[r.tier]}>{RANK_SHAPES[r.tier]}</T>
-                <T size={15} weight="500" style={{ flex: 1 }} numberOfLines={2}>{exerciseById(id).name}</T>
-                <T size={14} weight="700">{r.label}</T>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 12, gap: 18, alignItems: 'center', flexGrow: 1 }}>
+        <View style={{ height: 30 }} />
+        <T size={13} weight="700" color="brand" accessibilityRole="header">TU PROGRESO · ENTRENO DE HOY</T>
+
+        {d && after ? (
+          <>
+            <View style={{ width: 84, height: 84, borderRadius: 24, overflow: 'hidden', backgroundColor: '#070707' }}>
+              <Image source={muscleImages[d.muscle]} style={{ width: 84, height: 84 }} resizeMode="cover" accessibilityIgnoresInvertColors />
+            </View>
+            <T size={34} weight="700">{MUSCLE_LABELS[d.muscle]}</T>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+              <View style={{ alignItems: 'center', gap: 6 }}>
+                <RankBadge rank={before} size={110} />
+                <T size={14} weight="500" color="secondary">{before ? before.label : 'Sin rango'}</T>
               </View>
-              <Bar tier={r.tier} progress={r.progress} />
+              <ArrowRight size={28} color={colors.brand} />
+              <Animated.View style={[{ alignItems: 'center', gap: 6 }, badgeStyle]}>
+                <RankBadge rank={after} size={150} />
+                <T size={16} weight="700">{after.label}</T>
+              </Animated.View>
+            </View>
+
+            <Card style={{ alignSelf: 'stretch', borderRadius: 22, padding: 16, gap: 8 }}>
+              <T size={13} weight="500" color="secondary">{next ? `Para subir a ${next}` : 'Has alcanzado el rango máximo'}</T>
+              <T size={44} weight="700" color="brand">{`${pct} %`}</T>
+              <Bar progress={after.progress} color={colors.brand} height={8} />
+              <T size={13} color="secondary">{`${next ? `Te falta un ${100 - pct} % para subir de rango · ` : ''}hoy has sumado +${gained} %`}</T>
             </Card>
-          );
-        })}
-        <Button label="Listo" onPress={() => router.replace('/entrenar')} />
+          </>
+        ) : (
+          <Card style={{ alignSelf: 'stretch', borderRadius: 22, padding: 20, gap: 8, marginTop: 24 }}>
+            <T size={18} weight="700">Hoy no ha cambiado ningún rango</T>
+            <T size={14} color="secondary">Sube peso o repeticiones en tus ejercicios para avanzar hacia el siguiente rango.</T>
+          </Card>
+        )}
+
+        <View style={{ flex: 1, minHeight: 12 }} />
+        <Button label="Continuar" style={{ alignSelf: 'stretch' }} onPress={() => router.replace('/entrenar')} />
       </ScrollView>
     </SafeAreaView>
   );
