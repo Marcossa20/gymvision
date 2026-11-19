@@ -1,3 +1,4 @@
+import i18n from 'i18next';
 // Formato en español: miles con punto (3.120), decimales con coma (2,4 km), fechas «viernes 16 de octubre».
 // (Intl agrupa los miles solo a partir de 5 cifras en es-ES, por eso se hace a mano.)
 
@@ -17,7 +18,7 @@ export function fmtClock(ms: number) {
 const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
-export const fmtDate = (t: number) => {
-  const d = new Date(t);
-  return `${DAYS[d.getDay()]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+export const fmtDate = (ts: number) => {
+  const d = new Date(ts);
+  return i18n.t('{{day}} {{d}} de {{month}}', { day: i18n.t(DAYS[d.getDay()]), d: d.getDate(), month: i18n.t(MONTHS[d.getMonth()]) });
 };

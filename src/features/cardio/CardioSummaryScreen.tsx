@@ -16,6 +16,7 @@ import { rankImages } from '../ranks/rankImages';
 import { BottomActions } from '../gym/ui';
 import { cardioKind } from './catalog';
 import { fmtDate, fmtDec, fmtInt } from './format';
+import { useTranslation } from 'react-i18next';
 
 function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
@@ -28,6 +29,7 @@ function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; la
 }
 
 export function CardioSummaryScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const pending = useCardio((s) => s.pending);
@@ -46,20 +48,20 @@ export function CardioSummaryScreen() {
     const before = rankFromPoints(useCardio.getState().points);
     useCardio.getState().savePending();
     const now = rankFromPoints(useCardio.getState().points);
-    if (now.label !== before.label) notify('rango', `¡Subes a ${now.label} en Cardio!`);
-    else notify('serie', 'Cardio guardado');
+    if (now.label !== before.label) notify('rango', t('¡Subes a {{label}} en Cardio!', { label: now.label }));
+    else notify('serie', t('Cardio guardado'));
     leave();
   };
 
   const discard = () => {
     useCardio.getState().setPending(null);
-    notify('info', 'Cardio descartado', {
-      actionLabel: 'Deshacer',
+    notify('info', t('Cardio descartado'), {
+      actionLabel: t('Deshacer'),
       ms: 6000,
       onAction: () => {
         useCardio.getState().setPending(p);
         useCardio.getState().savePending();
-        notify('serie', 'Cardio recuperado y guardado');
+        notify('serie', t('Cardio recuperado y guardado'));
       },
     });
     leave();
@@ -70,34 +72,34 @@ export function CardioSummaryScreen() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, gap: 14 }}>
         <View style={{ alignItems: 'center', gap: 8 }}>
           <Image source={kind.thumb} style={{ width: 64, height: 64, borderRadius: 32 }} accessibilityIgnoresInvertColors />
-          <T size={26} weight="700" style={{ textAlign: 'center' }} accessibilityRole="header">Cardio completado</T>
-          <T size={14} color="secondary" style={{ textAlign: 'center' }}>{exercise.name} · {fmtDate(p.date)}</T>
+          <T size={26} weight="700" style={{ textAlign: 'center' }} accessibilityRole="header">{t('Cardio completado')}</T>
+          <T size={14} color="secondary" style={{ textAlign: 'center' }}>{t(exercise.name)} · {fmtDate(p.date)}</T>
         </View>
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Stat icon={<Clock size={18} color={colors.brand} />} value={`${minutes} min`} label="Duración" />
+          <Stat icon={<Clock size={18} color={colors.brand} />} value={`${minutes} min`} label={t('Duración')} />
           {kind.usesSteps ? (
-            <Stat icon={<PersonStanding size={18} color={colors.brand} />} value={fmtInt(p.steps)} label="Pasos" />
+            <Stat icon={<PersonStanding size={18} color={colors.brand} />} value={fmtInt(p.steps)} label={t('Pasos')} />
           ) : (
-            <Stat icon={<Flame size={18} color={colors.brand} />} value={`${fmtInt(p.kcal)} kcal`} label="Aprox." />
+            <Stat icon={<Flame size={18} color={colors.brand} />} value={`${fmtInt(p.kcal)} kcal`} label={t('Aprox.')} />
           )}
         </View>
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Stat icon={<Route size={18} color={colors.brand} />} value={`${fmtDec(p.distanceKm)} km`} label={kind.usesSteps ? 'Distancia' : 'Distancia aprox.'} />
-          {kind.usesSteps ? <Stat icon={<Flame size={18} color={colors.brand} />} value={`${fmtInt(p.kcal)} kcal`} label="Aprox." /> : <View style={{ flex: 1 }} />}
+          <Stat icon={<Route size={18} color={colors.brand} />} value={`${fmtDec(p.distanceKm)} km`} label={kind.usesSteps ? t('Distancia') : t('Distancia aprox.')} />
+          {kind.usesSteps ? <Stat icon={<Flame size={18} color={colors.brand} />} value={`${fmtInt(p.kcal)} kcal`} label={t('Aprox.')} /> : <View style={{ flex: 1 }} />}
         </View>
         <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14, borderRadius: 22, borderWidth: 1.5, borderColor: colors.brand }}>
-          <Image source={rankImages[after.tier]} style={{ width: 44, height: 44 }} resizeMode="contain" accessible accessibilityLabel={`Rango ${after.label}`} />
+          <Image source={rankImages[after.tier]} style={{ width: 44, height: 44 }} resizeMode="contain" accessible accessibilityLabel={t('Rango {{label}}', { label: after.label })} />
           <View style={{ flex: 1, gap: 2 }}>
-            <T size={15} weight="700">Suma a tu rango de Cardio</T>
-            <T size={13} color="secondary">{after.label} · +{fmtInt(p.points)} puntos esta sesión</T>
+            <T size={15} weight="700">{t('Suma a tu rango de Cardio')}</T>
+            <T size={13} color="secondary">{t('{{label}} · +{{n}} puntos esta sesión', { label: after.label, n: fmtInt(p.points) })}</T>
           </View>
         </Card>
       </ScrollView>
       <BottomActions>
-        <Button label="Guardar cardio" onPress={save} />
+        <Button label={t('Guardar cardio')} onPress={save} />
         {/* Acción destructiva: texto rojo + palabra explícita (no solo color), y se puede deshacer */}
-        <Pressable accessibilityRole="button" accessibilityLabel="Descartar" onPress={discard} style={({ pressed }) => ({ minHeight: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card, borderWidth: 1, borderColor: colors.divider, opacity: pressed ? 0.85 : 1 })}>
-          <T size={17} weight="600" color={colors.danger}>Descartar</T>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Descartar')} onPress={discard} style={({ pressed }) => ({ minHeight: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card, borderWidth: 1, borderColor: colors.divider, opacity: pressed ? 0.85 : 1 })}>
+          <T size={17} weight="600" color={colors.danger}>{t('Descartar')}</T>
         </Pressable>
       </BottomActions>
     </SafeAreaView>
