@@ -1,9 +1,9 @@
-// Formatos en español para Perfil (miles con punto, decimales con coma, fechas abreviadas).
+// Formatos para Perfil (según el idioma: miles, decimales y nombres de día/mes abreviados).
+import i18n from 'i18next';
 export { fmtInt, fmtDec } from '../cardio/format';
 import { fmtDec, fmtInt } from '../cardio/format';
 
-const DAYS_SHORT = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
-const MONTHS_SHORT = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']; // se traducen al mostrarlos
 const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
 export const startOfDay = (t: number) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -11,17 +11,17 @@ export const startOfDay = (t: number) => { const d = new Date(t); d.setHours(0, 
 /** «HOY», «AYER» o «LUN 12 OCT». */
 export function fmtDayLabel(t: number, now = Date.now()) {
   const diff = Math.round((startOfDay(now) - startOfDay(t)) / 86400000);
-  if (diff === 0) return 'HOY';
-  if (diff === 1) return 'AYER';
+  if (diff === 0) return i18n.t('Hoy').toUpperCase();
+  if (diff === 1) return i18n.t('Ayer').toUpperCase();
   const d = new Date(t);
-  return `${DAYS_SHORT[d.getDay()]} ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+  return `${dayShort(t)} ${d.getDate()} ${monthShort(d.getMonth())}`;
 }
 
-export const fmtLongDate = (t: number) => { const d = new Date(t); return `${d.getDate()} de ${MONTHS[d.getMonth()]}, ${d.getFullYear()}`; };
-export const fmtShortDate = (t: number) => { const d = new Date(t); return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}`; };
-export const monthName = (m: number) => MONTHS[m];
-export const dayShort = (t: number) => DAYS_SHORT[new Date(t).getDay()];
-export const monthShort = (m: number) => MONTHS_SHORT[m];
+export const monthName = (m: number) => i18n.t(MONTHS[m]);
+export const dayShort = (t: number) => i18n.t(DAYS[new Date(t).getDay()]).slice(0, 3).toUpperCase();
+export const monthShort = (m: number) => monthName(m).slice(0, 3).toUpperCase();
+export const fmtLongDate = (t: number) => { const d = new Date(t); return i18n.t('{{d}} de {{month}}, {{y}}', { d: d.getDate(), month: monthName(d.getMonth()), y: d.getFullYear() }); };
+export const fmtShortDate = (t: number) => { const d = new Date(t); return `${d.getDate()} ${monthName(d.getMonth()).slice(0, 3)}`; };
 
 /** «1 h 11 min» / «54 min». */
 export function fmtDuration(min: number) {
@@ -31,8 +31,8 @@ export function fmtDuration(min: number) {
 }
 
 /** «36,1 mil kg» a partir de 10.000; si no, «6.895 kg». */
-export const fmtKg = (kg: number) => (kg >= 10000 ? `${fmtDec(kg / 1000)} mil kg` : `${fmtInt(kg)} kg`);
+export const fmtKg = (kg: number) => (kg >= 10000 ? i18n.t('{{n}} mil kg', { n: fmtDec(kg / 1000) }) : `${fmtInt(kg)} kg`);
 /** Eje: «0», «5 mil», «60». */
-export const fmtAxis = (v: number) => (v >= 1000 ? `${fmtDec(v / 1000, v % 1000 === 0 ? 0 : 1)} mil` : fmtInt(v));
+export const fmtAxis = (v: number) => (v >= 1000 ? i18n.t('{{n}} mil', { n: fmtDec(v / 1000, v % 1000 === 0 ? 0 : 1) }) : fmtInt(v));
 /** Peso de una serie: «32,5 kg». */
 export const fmtWeight = (kg: number) => `${Number.isInteger(kg) ? kg : fmtDec(kg)} kg`;

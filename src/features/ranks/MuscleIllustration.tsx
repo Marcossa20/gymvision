@@ -6,6 +6,7 @@ import type { Muscle } from '../../data/seed';
 import { useTheme } from '../../theme/useTheme';
 import { muscleImages } from '../workout/muscleImages';
 import { MUSCLE_LABELS } from './muscles';
+import { useTranslation } from 'react-i18next';
 
 /** Siluetas de cuerpo entero (fondo negro) que se pueden superponer con «lighten», como en Figma. */
 const FULL_BODY: Partial<Record<Muscle, number>> = {
@@ -15,12 +16,13 @@ const FULL_BODY: Partial<Record<Muscle, number>> = {
 };
 
 export function MuscleIllustration({ muscles, width }: { muscles: Muscle[]; width: number }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const full = muscles.filter((m) => FULL_BODY[m] !== undefined);
   // Encaje de Figma: imagen de 367,5 × 658 desplazada (-5, -66) dentro de un hueco de 348 × 138.
   const k = width / 348;
   return (
-    <View style={{ height: 170, backgroundColor: colors.bg, justifyContent: 'center' }} accessible accessibilityLabel={`Músculos: ${muscles.map((m) => MUSCLE_LABELS[m]).join(', ')}`}>
+    <View style={{ height: 170, backgroundColor: colors.bg, justifyContent: 'center' }} accessible accessibilityLabel={`${t('Músculos')}: ${muscles.map((m) => t(MUSCLE_LABELS[m])).join(', ')}`}>
       <View style={{ height: 138, borderRadius: 16, overflow: 'hidden' }}>
         {full.length === muscles.length && full.length > 0 ? (
           full.map((m, i) => (

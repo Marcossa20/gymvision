@@ -3,6 +3,7 @@
 // Modo demostración (Laboratorio): puntos de ejemplo para enseñar el mapa y los modos de daltonismo
 // sin tener que entrenar antes. Vive en un store propio de B.
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -63,6 +64,7 @@ export const exerciseRank = (points: Record<string, number>, e: Exercise) => ran
 
 /** Rango de cada músculo = el mejor de los ejercicios que lo trabajan. */
 export function useMuscleRanks() {
+  const { i18n: inst } = useTranslation(); // los nombres de rango se recalculan al cambiar de idioma
   const points = useExercisePoints();
   const demo = useRanksDemo((s) => s.demo);
   return useMemo(() => {
@@ -85,5 +87,5 @@ export function useMuscleRanks() {
     }));
     const general = rankOrNull(demo ? DEMO_GENERAL_POINTS : avg([...all]));
     return { byMuscle, groups, general, points };
-  }, [points, demo]);
+  }, [points, demo, inst.language]);
 }

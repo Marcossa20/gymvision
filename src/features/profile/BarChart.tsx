@@ -11,12 +11,14 @@ import { alpha } from '../gym/ui';
 import type { Bucket } from './progress';
 import { niceAxis } from './progress';
 import { fmtAxis } from './format';
+import { useTranslation } from 'react-i18next';
 
 const H = 204, PLOT_TOP = 20, BASE = 170, AXIS_W = 44;
 
 export function BarChart({ buckets, selected, onSelect, format }: {
   buckets: Bucket[]; selected: number; onSelect: (i: number) => void; format: (v: number) => string;
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [w, setW] = useState(0);
   const max = Math.max(0, ...buckets.map((b) => b.value));
@@ -30,10 +32,10 @@ export function BarChart({ buckets, selected, onSelect, format }: {
 
   return (
     <View style={{ height: H }} onLayout={(e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width)}>
-      {ticks.map((t) => (
-        <React.Fragment key={t}>
-          <View style={{ position: 'absolute', left: AXIS_W, right: 0, top: y(t), height: 1, backgroundColor: t === 0 ? colors.textSecondary : colors.divider }} />
-          <T size={10.5} weight="500" color="secondary" style={{ position: 'absolute', left: 0, width: 36, top: y(t) - 7, textAlign: 'right' }}>{fmtAxis(t)}</T>
+      {ticks.map((tk) => (
+        <React.Fragment key={tk}>
+          <View style={{ position: 'absolute', left: AXIS_W, right: 0, top: y(tk), height: 1, backgroundColor: tk === 0 ? colors.textSecondary : colors.divider }} />
+          <T size={10.5} weight="500" color="secondary" style={{ position: 'absolute', left: 0, width: 36, top: y(tk) - 7, textAlign: 'right' }}>{fmtAxis(tk)}</T>
         </React.Fragment>
       ))}
       {buckets.map((b, i) => {
@@ -46,7 +48,7 @@ export function BarChart({ buckets, selected, onSelect, format }: {
             onPress={() => onSelect(i)}
             accessibilityRole="button"
             accessibilityState={{ selected: isSel }}
-            accessibilityLabel={`${b.long}: ${b.value ? format(b.value) : 'sin entreno'}`}
+            accessibilityLabel={`${b.long}: ${b.value ? format(b.value) : t('sin entreno')}`}
             style={{ position: 'absolute', left: x, width: colW, top: 0, height: H }}
           >
             {b.value > 0 ? (
@@ -60,7 +62,7 @@ export function BarChart({ buckets, selected, onSelect, format }: {
       })}
       {sel && w > 0 ? (
         <View pointerEvents="none" style={{ position: 'absolute', top: Math.max(0, y(sel.value) - 58), left: Math.min(Math.max(AXIS_W, AXIS_W + selected * colW + colW / 2 - 55), w - 110), width: 110, alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: colors.divider, backgroundColor: colors.card }}>
-          <T size={14} weight="700">{sel.value ? format(sel.value) : 'Sin entreno'}</T>
+          <T size={14} weight="700">{sel.value ? format(sel.value) : t('Sin entreno')}</T>
           <T size={10.5} weight="500" color="secondary" style={{ letterSpacing: 0.6 }}>{sel.long}</T>
         </View>
       ) : null}
