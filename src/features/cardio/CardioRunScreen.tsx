@@ -19,6 +19,7 @@ import { useTheme } from '../../theme/useTheme';
 import { alpha } from '../gym/ui';
 import { cardioKind, cardioPointsFor, computeMetrics, goalProgress, type CardioGoal } from './catalog';
 import { fmtClock, fmtDec, fmtInt } from './format';
+import { useTranslation } from 'react-i18next';
 
 function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
@@ -49,6 +50,7 @@ function useManualTimer(running: boolean) {
 
 export function CardioRunScreen() {
   useKeepAwake();
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
@@ -66,7 +68,7 @@ export function CardioRunScreen() {
   const heightCm = useProfile((s) => s.heightCm);
 
   const counter = useStepCounter({
-    onWalkingChange: (w) => notify('cardio', w ? 'Movimiento detectado · cronómetro en marcha' : 'Sin movimiento · cronómetro en pausa'),
+    onWalkingChange: (w) => notify('cardio', w ? t('Movimiento detectado · cronómetro en marcha') : t('Sin movimiento · cronómetro en pausa')),
   });
   const manualMs = useManualTimer(!kind.usesSteps && !paused && !finished);
 
@@ -78,7 +80,7 @@ export function CardioRunScreen() {
   }, [kind.usesSteps, paused, finished]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Inicio (cardio manual): 2 pulsos cortos
-  useEffect(() => { if (!kind.usesSteps) notify('cardio', `${exercise.name} · cronómetro en marcha`); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!kind.usesSteps) notify('cardio', t('{{name}} · cronómetro en marcha', { name: t(exercise.name) })); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeMs = kind.usesSteps ? counter.activeMs : manualMs;
   const m = computeMetrics(kind, activeMs, counter.steps, heightCm);
@@ -87,14 +89,14 @@ export function CardioRunScreen() {
   useEffect(() => {
     if (progress !== null && progress >= 1 && !goalNotified.current) {
       goalNotified.current = true;
-      notify('cardio', '¡Objetivo cumplido!');
+      notify('cardio', t('¡Objetivo cumplido!'));
     }
   }, [progress]);
 
   usePreventRemove(!finished, ({ data }) => {
-    Alert.alert('¿Salir sin guardar?', 'Perderás el registro de este cardio.', [
-      { text: 'Seguir', style: 'cancel' },
-      { text: 'Salir', style: 'destructive', onPress: () => navigation.dispatch(data.action) },
+    Alert.alert(t('¿Salir sin guardar?'), t('Perderás el registro de este cardio.'), [
+      { text: t('Seguir'), style: 'cancel' },
+      { text: t('Salir'), style: 'destructive', onPress: () => navigation.dispatch(data.action) },
     ]);
   });
 
@@ -102,21 +104,21 @@ export function CardioRunScreen() {
     setFinished(true);
     counter.stop();
     setPending({ id: String(Date.now()), exerciseId: exercise.id, date: Date.now(), ...m, points: cardioPointsFor(m), goal, target });
-    notify('cardio', 'Cardio terminado');
+    notify('cardio', t('Cardio terminado'));
   };
   useEffect(() => { if (finished) router.replace('/cardio/summary' as never); }, [finished, router]);
 
   // Estado: punto + texto (el color nunca va solo)
   const moving = kind.usesSteps ? counter.walking : true;
-  const state = paused ? 'Pausado' : kind.usesSteps ? (counter.walking ? 'Detectando movimiento' : counter.available === false ? 'Acelerómetro no disponible' : 'Esperando movimiento') : 'En marcha';
+  const state = paused ? t('Pausado') : kind.usesSteps ? (counter.walking ? t('Detectando movimiento') : counter.available === false ? t('Acelerómetro no disponible') : t('Esperando movimiento')) : t('En marcha');
   const live = !paused && moving;
 
   // Tarjeta principal: la métrica del objetivo (en cardio con pasos, siempre los pasos)
   const main = kind.usesSteps || goal === 'steps'
-    ? { value: fmtInt(m.steps), unit: 'pasos', goalText: goal === 'steps' && target ? ` · objetivo ${fmtInt(target)}` : '' }
+    ? { value: fmtInt(m.steps), unit: t('pasos'), goalText: goal === 'steps' && target ? ` ${t('· objetivo {{n}}', { n: fmtInt(target) })}` : '' }
     : goal === 'time'
-      ? { value: fmtInt(activeMs / 60000), unit: 'min', goalText: target ? ` · objetivo ${fmtInt(target)}` : '' }
-      : { value: fmtDec(m.distanceKm), unit: 'km', goalText: goal === 'distance' && target ? ` · objetivo ${fmtDec(target)}` : '' };
+      ? { value: fmtInt(activeMs / 60000), unit: t('min'), goalText: target ? ` ${t('· objetivo {{n}}', { n: fmtInt(target) })}` : '' }
+      : { value: fmtDec(m.distanceKm), unit: t('km'), goalText: goal === 'distance' && target ? ` ${t('· objetivo {{n}}', { n: fmtDec(target) })}` : '' };
   const TitleIcon = exercise.id === 'bicicleta' ? Bike : PersonStanding;
 
   return (
@@ -124,16 +126,16 @@ export function CardioRunScreen() {
       <View style={{ flex: 1, paddingHorizontal: 20, paddingVertical: 12, gap: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TitleIcon size={22} color={colors.brand} />
-          <T size={20} weight="700" accessibilityRole="header">{exercise.name}</T>
+          <T size={20} weight="700" accessibilityRole="header">{t(exercise.name)}</T>
         </View>
         <View accessible accessibilityLiveRegion="polite" accessibilityLabel={state} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14, backgroundColor: live ? alpha(colors.brand, 0.14) : colors.card, borderWidth: live ? 0 : 1, borderColor: colors.divider }}>
           {live ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.brand }} /> : <Pause size={10} color={colors.textSecondary} fill={colors.textSecondary} />}
           <T size={12} weight="600" color={live ? 'brand' : 'secondary'}>{state}</T>
         </View>
 
-        <View style={{ alignItems: 'center', gap: 2 }} accessible accessibilityLabel={`Tiempo ${fmtClock(activeMs)}`}>
+        <View style={{ alignItems: 'center', gap: 2 }} accessible accessibilityLabel={`${t('Tiempo')} ${fmtClock(activeMs)}`}>
           <T size={72} weight="700" style={{ fontVariant: ['tabular-nums'] }}>{fmtClock(activeMs)}</T>
-          <T size={12} weight="600" color="secondary">TIEMPO</T>
+          <T size={12} weight="600" color="secondary">{t('TIEMPO')}</T>
         </View>
 
         <Card style={{ alignItems: 'center', gap: 8, padding: 20, borderRadius: 26 }}>
@@ -147,8 +149,8 @@ export function CardioRunScreen() {
         </Card>
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Stat icon={<Route size={18} color={colors.brand} />} value={`${fmtDec(m.distanceKm)} km`} label={kind.usesSteps ? 'Distancia' : 'Distancia aprox.'} />
-          <Stat icon={<Flame size={18} color={colors.brand} />} value={`${fmtInt(m.kcal)} kcal`} label="Aprox." />
+          <Stat icon={<Route size={18} color={colors.brand} />} value={`${fmtDec(m.distanceKm)} km`} label={kind.usesSteps ? t('Distancia') : t('Distancia aprox.')} />
+          <Stat icon={<Flame size={18} color={colors.brand} />} value={`${fmtInt(m.kcal)} kcal`} label={t('Aprox.')} />
         </View>
 
         <View style={{ flex: 1, minHeight: 80, borderRadius: 24, overflow: 'hidden' }}>
@@ -158,12 +160,12 @@ export function CardioRunScreen() {
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <Button
             variant="secondary"
-            label={paused ? 'Reanudar' : 'Pausar'}
+            label={paused ? t('Reanudar') : t('Pausar')}
             onPress={() => setPaused((p) => !p)}
             icon={paused ? <Play size={20} color={colors.textPrimary} /> : <Pause size={20} color={colors.textPrimary} />}
             style={{ flex: 1, flexDirection: 'row-reverse' }}
           />
-          <Button label="Terminar" onPress={finish} style={{ flex: 1 }} />
+          <Button label={t('Terminar')} onPress={finish} style={{ flex: 1 }} />
         </View>
       </View>
     </SafeAreaView>

@@ -13,6 +13,7 @@ import { notify } from '../../services/alerts';
 import { createScanGuard, lookupMachine } from '../../services/qr';
 import { useTheme } from '../../theme/useTheme';
 import { alpha, BottomActions, ScreenBar } from './ui';
+import { useTranslation } from 'react-i18next';
 
 const FRAME = 260;
 const CORNER = 56;
@@ -34,6 +35,7 @@ function Corner({ pos }: { pos: 'tl' | 'tr' | 'bl' | 'br' }) {
 }
 
 export function ScanScreen() {
+  const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const focused = useIsFocused();
@@ -63,15 +65,15 @@ export function ScanScreen() {
     const r = lookupMachine(data);
     if (r.ok) {
       handled.current = true;
-      notify('qr', `Código ${r.code} reconocido`);
+      notify('qr', t('Código {{code}} reconocido', { code: r.code }));
       router.replace(`/gym/machine/${r.code}` as never);
     } else if (r.reason === 'not-found') {
       handled.current = true;
-      notify('error', `${r.code}: máquina no encontrada`);
+      notify('error', t('{{code}}: máquina no encontrada', { code: r.code }));
       router.replace({ pathname: '/gym/manual', params: { code: r.code ?? '', error: '1' } } as never);
     } else {
-      notify('error', 'Este QR no es de una máquina');
-      setHint('Este QR no es de una máquina. Busca el que tiene el código PB-0000.');
+      notify('error', t('Este QR no es de una máquina'));
+      setHint(t('Este QR no es de una máquina. Busca el que tiene el código PB-0000.'));
     }
   };
 
@@ -88,9 +90,9 @@ export function ScanScreen() {
         </>
       ) : null}
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
-        <ScreenBar title="Escanear máquina" />
+        <ScreenBar title={t('Escanear máquina')} />
         <View style={{ alignItems: 'center', paddingTop: 56, paddingHorizontal: 20, gap: 28 }}>
-          <View style={{ width: FRAME, height: FRAME, alignItems: 'center', justifyContent: 'center' }} accessible accessibilityLabel="Marco de escaneo">
+          <View style={{ width: FRAME, height: FRAME, alignItems: 'center', justifyContent: 'center' }} accessible accessibilityLabel={t('Marco de escaneo')}>
             <Corner pos="tl" /><Corner pos="tr" /><Corner pos="bl" /><Corner pos="br" />
             {!granted ? <QrCode size={92} color={colors.textSecondary} strokeWidth={1.5} /> : null}
             <Animated.View
@@ -102,16 +104,16 @@ export function ScanScreen() {
             />
           </View>
           <View style={{ gap: 6, alignItems: 'center' }}>
-            <T size={22} weight="700" style={{ textAlign: 'center' }}>Apunta al código QR</T>
+            <T size={22} weight="700" style={{ textAlign: 'center' }}>{t('Apunta al código QR')}</T>
             <T size={14} color="secondary" style={{ textAlign: 'center' }}>
-              {hint ?? (permission && !granted ? 'Sin permiso de cámara: usa el código manual.' : 'Lo encontrarás en la máquina. Vibrará al leerlo.')}
+              {hint ?? (permission && !granted ? t('Sin permiso de cámara: usa el código manual.') : t('Lo encontrarás en la máquina. Vibrará al leerlo.'))}
             </T>
           </View>
-          {permission && !granted ? <Button variant="secondary" label="Permitir cámara" onPress={() => void requestPermission()} style={{ alignSelf: 'stretch' }} /> : null}
+          {permission && !granted ? <Button variant="secondary" label={t('Permitir cámara')} onPress={() => void requestPermission()} style={{ alignSelf: 'stretch' }} /> : null}
         </View>
         <View style={{ flex: 1 }} />
         <BottomActions>
-          <Button variant="secondary" label="Código manual" onPress={() => router.replace('/gym/manual' as never)} icon={<Keyboard size={22} color={colors.textPrimary} />} style={{ flexDirection: 'row-reverse', borderWidth: 0 }} />
+          <Button variant="secondary" label={t('Código manual')} onPress={() => router.replace('/gym/manual' as never)} icon={<Keyboard size={22} color={colors.textPrimary} />} style={{ flexDirection: 'row-reverse', borderWidth: 0 }} />
         </BottomActions>
       </SafeAreaView>
     </View>

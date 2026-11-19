@@ -8,13 +8,15 @@ import { Check, Clock, Dumbbell, Layers, Trophy } from 'lucide-react-native';
 import { Button, Card, T } from '../../components/ui';
 import { exerciseById } from '../../data/seed';
 import { fmtDateLong, fmtDuration, fmtNum, fmtThousands } from '../../domain/format';
-import { MUSCLE_LABELS } from '../ranks/muscles';
+import { muscleLabel } from '../routines/Thumb';
 import { useWorkout } from '../../store/workout';
 import { useSettings } from '../../store/settings';
 import { useTheme } from '../../theme/useTheme';
 import { muscleImages } from './muscleImages';
+import { useTranslation } from 'react-i18next';
 
 export function SummaryScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const s = useWorkout((st) => st.lastSummary);
@@ -36,8 +38,8 @@ export function SummaryScreen() {
           <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center' }}>
             <Check size={32} color={colors.onBrand} strokeWidth={3} />
           </View>
-          <T size={26} weight="700" accessibilityRole="header">Entreno completado</T>
-          <T size={14} color="secondary">{`${s.name} · ${fmtDateLong(s.date)}`}</T>
+          <T size={26} weight="700" accessibilityRole="header">{t('Entreno completado')}</T>
+          <T size={14} color="secondary">{t('{{name}} · {{date}}', { name: t(s.name), date: fmtDateLong(s.date) })}</T>
         </View>
 
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
@@ -45,28 +47,28 @@ export function SummaryScreen() {
             <Card key={label} style={{ width: '48%', flexGrow: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 12, gap: 4 }}>
               <I size={18} color={colors.brand} />
               <T size={20} weight="700">{value}</T>
-              <T size={12} color="secondary">{label}</T>
+              <T size={12} color="secondary">{t(label)}</T>
             </Card>
           ))}
         </View>
 
         {best ? (
           <Card style={{ borderRadius: 22, paddingHorizontal: 16, paddingVertical: 14, gap: 4, borderColor: colors.brand, borderWidth: 1.5 }}>
-            <T size={11} weight="600" color="brand">NUEVO RÉCORD</T>
-            <T size={16} weight="700">{exerciseById(best.exerciseId).name}</T>
-            <T size={13} color="secondary">{`${fmtNum(best.weight)} ${unit} × ${best.reps}  ·  +${fmtNum(best.delta)} ${unit} respecto a tu mejor marca`}</T>
+            <T size={11} weight="600" color="brand">{t('NUEVO RÉCORD')}</T>
+            <T size={16} weight="700">{t(exerciseById(best.exerciseId).name)}</T>
+            <T size={13} color="secondary">{t('{{w}} {{unit}} × {{reps}}  ·  +{{d}} {{unit}} respecto a tu mejor marca', { w: fmtNum(best.weight), unit, reps: best.reps, d: fmtNum(best.delta) })}</T>
           </Card>
         ) : null}
 
         {s.muscles?.length ? (
           <Card style={{ borderRadius: 22, paddingHorizontal: 16, paddingVertical: 14, gap: 8 }}>
-            <T size={14} weight="600">Músculos trabajados</T>
+            <T size={14} weight="600">{t('Músculos trabajados')}</T>
             {s.muscles.map(({ muscle, pct }) => (
-              <View key={muscle} accessible accessibilityLabel={`${MUSCLE_LABELS[muscle]}: ${pct} por ciento`} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <View key={muscle} accessible accessibilityLabel={t('{{m}}: {{pct}} por ciento', { m: muscleLabel(muscle), pct })} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={{ width: 26, height: 26, borderRadius: 7, overflow: 'hidden', backgroundColor: '#070707' }}>
                   <Image source={muscleImages[muscle]} style={{ width: 26, height: 26 }} resizeMode="cover" accessibilityIgnoresInvertColors />
                 </View>
-                <T size={13} weight="500" color="secondary" style={{ width: 82 }} numberOfLines={1}>{MUSCLE_LABELS[muscle]}</T>
+                <T size={13} weight="500" color="secondary" style={{ width: 82 }} numberOfLines={1}>{muscleLabel(muscle)}</T>
                 <View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: colors.divider, overflow: 'hidden' }}>
                   <View style={{ width: `${pct}%`, height: 6, backgroundColor: colors.brand }} />
                 </View>
@@ -77,8 +79,8 @@ export function SummaryScreen() {
         ) : null}
 
         <View style={{ flex: 1, minHeight: 12 }} />
-        <Button label="Ver progreso de rango" onPress={() => router.replace('/workout/rank-progress')} icon={<Trophy size={20} color={colors.onBrand} />} />
-        <Button label="Guardar y salir" variant="secondary" onPress={() => router.replace('/entrenar')} />
+        <Button label={t('Ver progreso de rango')} onPress={() => router.replace('/workout/rank-progress')} icon={<Trophy size={20} color={colors.onBrand} />} />
+        <Button label={t('Guardar y salir')} variant="secondary" onPress={() => router.replace('/entrenar')} />
       </ScrollView>
     </SafeAreaView>
   );

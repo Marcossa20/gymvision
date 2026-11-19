@@ -13,6 +13,7 @@ import { EMAIL_RE, passwordRules, passwordStrength, useAuth } from '../../store/
 import { useTheme } from '../../theme/useTheme';
 import { alpha, BottomActions } from '../gym/ui';
 import { Field, Rule } from './ui';
+import { useTranslation } from 'react-i18next';
 
 function IconBubble({ Icon, size = 64, solid }: { Icon: typeof Mail; size?: number; solid?: boolean }) {
   const { colors } = useTheme();
@@ -24,6 +25,7 @@ function IconBubble({ Icon, size = 64, solid }: { Icon: typeof Mail; size?: numb
 }
 
 export function ForgotScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const params = useLocalSearchParams<{ email?: string }>();
@@ -32,8 +34,8 @@ export function ForgotScreen() {
 
   const send = () => {
     if (!EMAIL_RE.test(email.trim())) {
-      setError('Escribe un correo válido, por ejemplo tu@correo.com.');
-      return notify('error', 'Correo no válido');
+      setError(t('Escribe un correo válido, por ejemplo tu@correo.com.'));
+      return notify('error', t('Correo no válido'));
     }
     useAuth.getState().requestReset(email);
     router.replace('/auth/sent' as never);
@@ -43,17 +45,17 @@ export function ForgotScreen() {
     <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: colors.bg }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 20, paddingVertical: 12, gap: 16 }} keyboardShouldPersistTaps="handled">
-          <Pressable accessibilityRole="button" accessibilityLabel="Volver" onPress={() => (router.canGoBack() ? router.back() : router.replace('/auth/login' as never))} style={{ width: 48, height: 48, marginLeft: -12, alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('Volver')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/auth/login' as never))} style={{ width: 48, height: 48, marginLeft: -12, alignItems: 'center', justifyContent: 'center' }}>
             <ChevronLeft size={24} color={colors.textPrimary} />
           </Pressable>
           <IconBubble Icon={Mail} />
-          <T size={26} weight="700" accessibilityRole="header">¿Olvidaste tu contraseña?</T>
-          <T size={15} color="secondary">Escribe el correo de tu cuenta y te enviaremos un enlace para crear una contraseña nueva.</T>
-          <Field label="Correo electrónico" icon={Mail} radius={16} placeholder="tu@correo.com" value={email} onChangeText={(t) => { setEmail(t); setError(null); }} error={error} keyboardType="email-address" autoCapitalize="none" autoComplete="email" returnKeyType="send" onSubmitEditing={send} />
+          <T size={26} weight="700" accessibilityRole="header">{t('¿Olvidaste tu contraseña?')}</T>
+          <T size={15} color="secondary">{t('Escribe el correo de tu cuenta y te enviaremos un enlace para crear una contraseña nueva.')}</T>
+          <Field label={t('Correo electrónico')} icon={Mail} radius={16} placeholder={t('tu@correo.com')} value={email} onChangeText={(v) => { setEmail(v); setError(null); }} error={error} keyboardType="email-address" autoCapitalize="none" autoComplete="email" returnKeyType="send" onSubmitEditing={send} />
           <View style={{ flex: 1 }} />
         </ScrollView>
         <BottomActions style={{ paddingBottom: 16 }}>
-          <Button label="Enviar enlace" onPress={send} />
+          <Button label={t('Enviar enlace')} onPress={send} />
         </BottomActions>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -61,6 +63,7 @@ export function ForgotScreen() {
 }
 
 export function SentScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const reset = useAuth((s) => s.reset);
@@ -68,31 +71,31 @@ export function SentScreen() {
 
   useEffect(() => {
     if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
+    const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
   }, [cooldown]);
 
   const resend = () => {
     if (!reset) return router.replace('/auth/forgot' as never);
     useAuth.getState().requestReset(reset.email);
     setCooldown(30);
-    notify('info', `Correo reenviado a ${reset.email}`);
+    notify('info', t('Correo reenviado a {{email}}', { email: reset.email }));
   };
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ flex: 1, alignItems: 'center', paddingHorizontal: 20, paddingTop: 122, gap: 18 }}>
         {/* Simulación: tocar el sobre equivale a abrir el enlace del correo */}
-        <Pressable onPress={() => router.push('/auth/new-password' as never)} accessibilityRole="link" accessibilityLabel="Abrir el enlace del correo (simulado)" hitSlop={8}>
+        <Pressable onPress={() => router.push('/auth/new-password' as never)} accessibilityRole="link" accessibilityLabel={t('Abrir el enlace del correo (simulado)')} hitSlop={8}>
           <IconBubble Icon={Mail} size={88} solid />
         </Pressable>
-        <T size={26} weight="700" style={{ textAlign: 'center' }} accessibilityRole="header">Revisa tu correo</T>
-        <T size={15} color="secondary" style={{ textAlign: 'center' }}>Hemos enviado un enlace a {reset?.email ?? 'tu correo'}. Caduca en 30 minutos.</T>
-        {__DEV__ ? <T size={12} color="secondary" style={{ textAlign: 'center' }}>Demo: toca el sobre para abrir el enlace.</T> : null}
+        <T size={26} weight="700" style={{ textAlign: 'center' }} accessibilityRole="header">{t('Revisa tu correo')}</T>
+        <T size={15} color="secondary" style={{ textAlign: 'center' }}>{t('Hemos enviado un enlace a {{email}}. Caduca en 30 minutos.', { email: reset?.email ?? t('tu correo') })}</T>
+        {__DEV__ ? <T size={12} color="secondary" style={{ textAlign: 'center' }}>{t('Demo: toca el sobre para abrir el enlace.')}</T> : null}
       </View>
       <BottomActions style={{ paddingBottom: 16 }}>
-        <Button label="Volver a iniciar sesión" onPress={() => router.replace({ pathname: '/auth/login', params: { email: reset?.email ?? '' } } as never)} />
-        <Button variant="secondary" label={cooldown > 0 ? `Reenviar correo (${cooldown} s)` : 'Reenviar correo'} onPress={resend} disabled={cooldown > 0} />
+        <Button label={t('Volver a iniciar sesión')} onPress={() => router.replace({ pathname: '/auth/login', params: { email: reset?.email ?? '' } } as never)} />
+        <Button variant="secondary" label={cooldown > 0 ? t('Reenviar correo ({{n}} s)', { n: cooldown }) : t('Reenviar correo')} onPress={resend} disabled={cooldown > 0} />
       </BottomActions>
     </SafeAreaView>
   );
@@ -101,6 +104,7 @@ export function SentScreen() {
 const STRENGTH = ['Muy débil', 'Débil', 'Mejorable', 'Segura', 'Muy segura'];
 
 export function NewPasswordScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const reset = useAuth((s) => s.reset);
@@ -113,13 +117,13 @@ export function NewPasswordScreen() {
 
   const save = () => {
     if (expired) {
-      notify('error', 'El enlace ha caducado. Pide uno nuevo.');
+      notify('error', t('El enlace ha caducado. Pide uno nuevo.'));
       return router.replace('/auth/forgot' as never);
     }
-    if (!ok) return notify('error', 'La contraseña no cumple los requisitos');
+    if (!ok) return notify('error', t('La contraseña no cumple los requisitos'));
     const email = reset!.email;
     useAuth.getState().setNewPassword(p);
-    notify('serie', 'Contraseña guardada');
+    notify('serie', t('Contraseña guardada'));
     router.replace({ pathname: '/auth/login', params: { email } } as never);
   };
 
@@ -128,25 +132,25 @@ export function NewPasswordScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 20, paddingTop: 28, gap: 16 }} keyboardShouldPersistTaps="handled">
           <IconBubble Icon={Lock} />
-          <T size={26} weight="700" accessibilityRole="header">Crea tu nueva contraseña</T>
-          <T size={15} color="secondary">Elige una contraseña segura que no uses en otras cuentas.</T>
-          <Field label="Nueva contraseña" icon={Lock} radius={16} secure value={p} onChangeText={setP} autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" />
-          <Field label="Repite la contraseña" icon={Lock} radius={16} secure value={r} onChangeText={setR} autoCapitalize="none" textContentType="newPassword" returnKeyType="done" onSubmitEditing={save} />
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }} accessible accessibilityLabel={`Fuerza de la contraseña: ${STRENGTH[strength]}`}>
+          <T size={26} weight="700" accessibilityRole="header">{t('Crea tu nueva contraseña')}</T>
+          <T size={15} color="secondary">{t('Elige una contraseña segura que no uses en otras cuentas.')}</T>
+          <Field label={t('Nueva contraseña')} icon={Lock} radius={16} secure value={p} onChangeText={setP} autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" />
+          <Field label={t('Repite la contraseña')} icon={Lock} radius={16} secure value={r} onChangeText={setR} autoCapitalize="none" textContentType="newPassword" returnKeyType="done" onSubmitEditing={save} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }} accessible accessibilityLabel={`${t('Fuerza de la contraseña')}: ${t(STRENGTH[strength])}`}>
             <View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: colors.divider, overflow: 'hidden' }}>
               <View style={{ width: `${(strength / 4) * 100}%`, height: '100%', borderRadius: 3, backgroundColor: strength >= 3 ? colors.brand : strength >= 2 ? colors.textSecondary : colors.danger }} />
             </View>
-            <T size={13} weight="600" color={strength >= 3 ? 'brand' : strength >= 2 ? 'secondary' : colors.danger}>{p ? STRENGTH[strength] : ' '}</T>
+            <T size={13} weight="600" color={strength >= 3 ? 'brand' : strength >= 2 ? 'secondary' : colors.danger}>{p ? t(STRENGTH[strength]) : ' '}</T>
           </View>
           <View style={{ gap: 8 }}>
-            <Rule ok={rules.length} label="Mínimo 8 caracteres" />
-            <Rule ok={rules.upperAndNumber} label="Una mayúscula y un número" />
-            <Rule ok={rules.match} label="Las dos contraseñas coinciden" />
+            <Rule ok={rules.length} label={t('Mínimo 8 caracteres')} />
+            <Rule ok={rules.upperAndNumber} label={t('Una mayúscula y un número')} />
+            <Rule ok={rules.match} label={t('Las dos contraseñas coinciden')} />
           </View>
           <View style={{ flex: 1 }} />
         </ScrollView>
         <BottomActions style={{ paddingBottom: 16 }}>
-          <Button label="Guardar contraseña" onPress={save} disabled={!ok} />
+          <Button label={t('Guardar contraseña')} onPress={save} disabled={!ok} />
         </BottomActions>
       </KeyboardAvoidingView>
     </SafeAreaView>

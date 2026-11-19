@@ -8,6 +8,7 @@ import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_7
 import { useTheme } from '../theme/useTheme';
 import { useAuth } from '../store/auth';
 import { AlertBanner } from '../components/AlertBanner';
+import '../i18n';
 import { initNotifications } from '../services/notifications';
 
 export default function RootLayout() {

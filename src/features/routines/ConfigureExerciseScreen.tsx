@@ -14,6 +14,7 @@ import { ScrollLockContext } from '../workout/scrollLock';
 import { Wheel } from '../workout/Wheel';
 import { useDraft } from './draft';
 import { ExThumb, muscleLabel } from './Thumb';
+import { useTranslation } from 'react-i18next';
 
 const goals: { id: CardioGoal; label: string; unit: string; step: number; min: number; def: number }[] = [
   { id: 'time', label: 'Tiempo', unit: 'min', step: 5, min: 5, def: 30 },
@@ -22,6 +23,7 @@ const goals: { id: CardioGoal; label: string; unit: string; step: number; min: n
 ];
 
 export function ConfigureExerciseScreen() {
+  const { t } = useTranslation();
   const { colors, highContrast } = useTheme();
   const router = useRouter();
   const { index } = useLocalSearchParams<{ index: string }>();
@@ -40,23 +42,23 @@ export function ConfigureExerciseScreen() {
   const quitar = () => {
     const removed = remove(i);
     router.back();
-    if (removed) notify('info', 'Ejercicio quitado de la rutina', { actionLabel: 'Deshacer', onAction: () => insert(i, removed), ms: 5000 });
+    if (removed) notify('info', t('Ejercicio quitado de la rutina'), { actionLabel: t('Deshacer'), onAction: () => insert(i, removed), ms: 5000 });
   };
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ height: 56, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Cerrar" onPress={() => router.back()} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}><X size={26} color={colors.textPrimary} /></Pressable>
-        <T size={18} weight="600" accessibilityRole="header" style={{ flex: 1, textAlign: 'center' }}>Configurar ejercicio</T>
-        <Pressable accessibilityRole="button" accessibilityLabel="Guardar" onPress={() => router.back()} style={{ minWidth: 64, height: 48, alignItems: 'center', justifyContent: 'center' }}><T size={16} weight="600" color="brand">Guardar</T></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Cerrar')} onPress={() => router.back()} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}><X size={26} color={colors.textPrimary} /></Pressable>
+        <T size={18} weight="600" accessibilityRole="header" style={{ flex: 1, textAlign: 'center' }}>{t('Configurar ejercicio')}</T>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Guardar')} onPress={() => router.back()} style={{ minWidth: 64, height: 48, alignItems: 'center', justifyContent: 'center' }}><T size={16} weight="600" color="brand">{t('Guardar')}</T></Pressable>
       </View>
       <ScrollLockContext.Provider value={setScrollLocked}>
       <ScrollView scrollEnabled={!scrollLocked} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 120, gap: 16 }}>
         <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 12, borderRadius: 20, backgroundColor: colors.card }, border]}>
           <ExThumb ex={ex} size={72} radius={18} />
           <View style={{ flex: 1, gap: 4 }}>
-            <T size={18} weight="700">{ex.name}</T>
-            <T size={13} color="secondary">{ex.muscles.length ? ex.muscles.map(muscleLabel).join(' · ') : 'Cardio'}</T>
+            <T size={18} weight="700">{t(ex.name)}</T>
+            <T size={13} color="secondary">{ex.muscles.length ? ex.muscles.map(muscleLabel).join(' · ') : t('Cardio')}</T>
           </View>
         </View>
 
@@ -66,16 +68,16 @@ export function ConfigureExerciseScreen() {
               {goals.filter((g) => g.id !== 'steps' || canSteps).map((g) => {
                 const sel = g.id === (e.goal ?? 'time');
                 return (
-                  <Pressable key={g.id} accessibilityRole="radio" accessibilityState={{ selected: sel }} accessibilityLabel={`Objetivo: ${g.label}`} onPress={() => update(i, { goal: g.id, target: g.def })}
+                  <Pressable key={g.id} accessibilityRole="radio" accessibilityState={{ selected: sel }} accessibilityLabel={t('Objetivo: {{g}}', { g: t(g.label) })} onPress={() => update(i, { goal: g.id, target: g.def })}
                     style={{ flex: 1, minHeight: 48, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: sel ? colors.brand : 'transparent' }}>
-                    <T size={14} weight={sel ? '700' : '500'} color={sel ? colors.onBrand : 'secondary'}>{g.label}</T>
+                    <T size={14} weight={sel ? '700' : '500'} color={sel ? colors.onBrand : 'secondary'}>{t(g.label)}</T>
                   </Pressable>
                 );
               })}
             </View>
             <View style={{ alignItems: 'center', gap: 8 }}>
-              <T size={11} weight="600" color={colors.radioOff} style={{ letterSpacing: 0.66 }}>{`OBJETIVO (${goal.unit.toUpperCase()})`}</T>
-              <Wheel active width="100%" height={128} valueSize={32} value={e.target ?? goal.def} step={goal.step} min={goal.min} label={`Objetivo en ${goal.unit}`} suffix={` ${goal.unit}`} onChange={(v) => update(i, { target: round(v) })} />
+              <T size={11} weight="600" color={colors.radioOff} style={{ letterSpacing: 0.66 }}>{t('OBJETIVO ({{unit}})', { unit: t(goal.unit).toUpperCase() })}</T>
+              <Wheel active width="100%" height={128} valueSize={32} value={e.target ?? goal.def} step={goal.step} min={goal.min} label={t('Objetivo en {{unit}}', { unit: t(goal.unit) })} suffix={` ${t(goal.unit)}`} onChange={(v) => update(i, { target: round(v) })} />
             </View>
           </>
         ) : (
@@ -87,38 +89,38 @@ export function ConfigureExerciseScreen() {
                 { l: 'PESO (KG)', v: e.weight, step: 2.5, min: 0, set: (v: number) => update(i, { weight: v }), f: fmtNum },
               ].map((w) => (
                 <View key={w.l} style={{ flex: 1, alignItems: 'center', gap: 8 }}>
-                  <T size={11} weight="600" color={colors.radioOff} style={{ letterSpacing: 0.66 }}>{w.l}</T>
-                  <Wheel active width="100%" height={128} valueSize={32} value={w.v} step={w.step} min={w.min} format={w.f} label={w.l.toLowerCase()} onChange={w.set} />
+                  <T size={11} weight="600" color={colors.radioOff} style={{ letterSpacing: 0.66 }}>{t(w.l)}</T>
+                  <Wheel active width="100%" height={128} valueSize={32} value={w.v} step={w.step} min={w.min} format={w.f} label={t(w.l)} onChange={w.set} />
                 </View>
               ))}
             </View>
 
             <View style={[{ minHeight: 76, borderRadius: 20, backgroundColor: colors.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 18, paddingRight: 12, paddingVertical: 12 }, border]}>
               <View style={{ flexShrink: 1, gap: 2 }}>
-                <T size={15} weight="600">Descanso</T>
-                <T size={12} color="secondary">Se inicia al marcar la serie</T>
+                <T size={15} weight="600">{t('Descanso')}</T>
+                <T size={12} color="secondary">{t('Se inicia al marcar la serie')}</T>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Pressable accessibilityRole="button" accessibilityLabel="Quitar 15 segundos de descanso" onPress={() => update(i, { restSec: Math.max(0, e.restSec - 15) })} style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.switchOff, alignItems: 'center', justifyContent: 'center' }}><Minus size={22} color={colors.textPrimary} /></Pressable>
+                <Pressable accessibilityRole="button" accessibilityLabel={t('Quitar 15 segundos de descanso')} onPress={() => update(i, { restSec: Math.max(0, e.restSec - 15) })} style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.switchOff, alignItems: 'center', justifyContent: 'center' }}><Minus size={22} color={colors.textPrimary} /></Pressable>
                 <T size={22} weight="700" accessibilityRole="text">{fmtClock(e.restSec)}</T>
-                <Pressable accessibilityRole="button" accessibilityLabel="Añadir 15 segundos de descanso" onPress={() => update(i, { restSec: e.restSec + 15 })} style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.switchOff, alignItems: 'center', justifyContent: 'center' }}><Plus size={22} color={colors.textPrimary} /></Pressable>
+                <Pressable accessibilityRole="button" accessibilityLabel={t('Añadir 15 segundos de descanso')} onPress={() => update(i, { restSec: e.restSec + 15 })} style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.switchOff, alignItems: 'center', justifyContent: 'center' }}><Plus size={22} color={colors.textPrimary} /></Pressable>
               </View>
             </View>
           </>
         )}
 
         <View style={{ gap: 8 }}>
-          <T size={14} weight="500" color="secondary">Notas</T>
+          <T size={14} weight="500" color="secondary">{t('Notas')}</T>
           <TextInput
-            accessibilityLabel="Notas del ejercicio" multiline value={e.notes ?? ''} onChangeText={(t) => update(i, { notes: t })} placeholder="Ej. Banco a 30°, asiento en la muesca 3" placeholderTextColor={colors.radioOff}
+            accessibilityLabel={t('Notas del ejercicio')} multiline value={e.notes ?? ''} onChangeText={(t) => update(i, { notes: t })} placeholder={t('Ej. Banco a 30°, asiento en la muesca 3')} placeholderTextColor={colors.radioOff}
             style={[{ minHeight: 84, borderRadius: 16, backgroundColor: colors.card, padding: 16, fontSize: 15, fontFamily: 'Inter_400Regular', color: colors.textPrimary, textAlignVertical: 'top' }, border]}
           />
         </View>
-        <Button label="Quitar de la rutina" variant="secondary" onPress={quitar} />
+        <Button label={t('Quitar de la rutina')} variant="secondary" onPress={quitar} />
       </ScrollView>
       </ScrollLockContext.Provider>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingBottom: 24, paddingTop: 12, backgroundColor: colors.bg }}>
-        <Button label="Guardar ejercicio" onPress={() => router.back()} />
+        <Button label={t('Guardar ejercicio')} onPress={() => router.back()} />
       </View>
     </SafeAreaView>
   );

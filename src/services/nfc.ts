@@ -2,6 +2,7 @@
 // Interacción de proximidad = gesto físico natural, sin menús ni teclear (menos carga cognitiva).
 // Plan B obligatorio: simulateLockTag() para demostrar el flujo sin etiqueta NFC o en móviles sin NFC.
 import { Platform } from 'react-native';
+import i18n from 'i18next';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import type NfcManagerType from 'react-native-nfc-manager';
 import type { NfcTech as NfcTechType, Ndef as NdefType, TagEvent } from 'react-native-nfc-manager';
@@ -82,32 +83,32 @@ function lockerFromTagId(id: string) {
  */
 export async function readLockTag(timeoutMs = 30000): Promise<LockTag> {
   const m = nfc();
-  if (!m) throw new Error('Este móvil o esta build no tiene NFC. Usa «Simular cerradura».');
+  if (!m) throw new Error(i18n.t('Este móvil o esta build no tiene NFC. Usa «Simular cerradura».'));
   const status = await getNfcStatus();
-  if (status === 'unsupported') throw new Error('Este móvil no tiene NFC. Usa «Simular cerradura».');
-  if (status === 'disabled') throw new Error('Activa el NFC en los ajustes del móvil.');
+  if (status === 'unsupported') throw new Error(i18n.t('Este móvil no tiene NFC. Usa «Simular cerradura».'));
+  if (status === 'disabled') throw new Error(i18n.t('Activa el NFC en los ajustes del móvil.'));
 
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     const read = (async () => {
       await m.default.requestTechnology([m.NfcTech.Ndef, m.NfcTech.NfcA], {
-        alertMessage: 'Acerca la parte de arriba del móvil a la cerradura',
+        alertMessage: i18n.t('Acerca la parte de arriba del móvil a la cerradura'),
       });
       const tag = await m.default.getTag();
       const parsed = parseLockTag(tag, m.Ndef);
-      if (!parsed) throw new Error('Etiqueta no reconocida. Prueba otra vez.');
-      if (Platform.OS === 'ios') await m.default.setAlertMessageIOS('Taquilla abierta').catch(() => {});
+      if (!parsed) throw new Error(i18n.t('Etiqueta no reconocida. Prueba otra vez.'));
+      if (Platform.OS === 'ios') await m.default.setAlertMessageIOS(i18n.t('Taquilla abierta')).catch(() => {});
       return parsed;
     })();
     const timeout = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new Error('No se detectó la cerradura. Inténtalo de nuevo.')), timeoutMs);
+      timer = setTimeout(() => reject(new Error(i18n.t('No se detectó la cerradura. Inténtalo de nuevo.'))), timeoutMs);
     });
     return await Promise.race([read, timeout]);
   } catch (e) {
     const msg = e instanceof Error && e.message ? e.message : '';
     // Cancelación del usuario / del sistema → mensaje genérico
-    if (!msg || /cancel/i.test(msg)) throw new Error('Lectura cancelada.');
-    throw e instanceof Error ? e : new Error('Error al leer la cerradura.');
+    if (!msg || /cancel/i.test(msg)) throw new Error(i18n.t('Lectura cancelada.'));
+    throw e instanceof Error ? e : new Error(i18n.t('Error al leer la cerradura.'));
   } finally {
     if (timer) clearTimeout(timer);
     await cancelNfc();

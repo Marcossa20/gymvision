@@ -15,6 +15,7 @@ import { alpha } from '../gym/ui';
 import type { MuscleRank } from './data';
 import { MAP_GRID, MAP_ORDER } from './mapData';
 import { MAP_IMAGES } from './mapImages';
+import { useTranslation } from 'react-i18next';
 
 const W = 146, H = 262; // tamaño de la figura en Figma
 
@@ -37,6 +38,7 @@ function hit(side: 'front' | 'back', x: number, y: number): Muscle | null {
 }
 
 function Figure({ side, ranks, onPress }: { side: 'front' | 'back'; ranks: Record<Muscle, MuscleRank>; onPress: (m: Muscle) => void }) {
+  const { t } = useTranslation();
   const palette = useRankColors();
   const imgs = MAP_IMAGES[side];
   const ranked = (Object.keys(imgs.muscles) as Muscle[]).filter((m) => ranks[m]?.rank);
@@ -44,7 +46,7 @@ function Figure({ side, ranks, onPress }: { side: 'front' | 'back'; ranks: Recor
     <Pressable
       onPress={(e: GestureResponderEvent) => { const m = hit(side, e.nativeEvent.locationX, e.nativeEvent.locationY); if (m) onPress(m); }}
       accessibilityRole="image"
-      accessibilityLabel={`Mapa muscular, vista de ${side === 'front' ? 'frente' : 'espalda'}. Usa la lista de abajo para ver cada músculo.`}
+      accessibilityLabel={t('Mapa muscular, vista de {{side}}. Usa la lista de abajo para ver cada músculo.', { side: side === 'front' ? t('frente') : t('espalda') })}
       style={{ width: W, height: H, borderRadius: 12, overflow: 'hidden', backgroundColor: '#070707', isolation: 'isolate' }}
     >
       <Image source={imgs.base} style={{ position: 'absolute', width: W, height: H }} resizeMode="stretch" accessibilityIgnoresInvertColors />
@@ -62,6 +64,7 @@ function Figure({ side, ranks, onPress }: { side: 'front' | 'back'; ranks: Recor
 }
 
 export function BodyMap({ ranks, onPress }: { ranks: Record<Muscle, MuscleRank>; onPress: (m: Muscle) => void }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const palette = useRankColors();
   return (
@@ -70,14 +73,14 @@ export function BodyMap({ ranks, onPress }: { ranks: Record<Muscle, MuscleRank>;
         {(['front', 'back'] as const).map((side) => (
           <View key={side} style={{ alignItems: 'center', gap: 8 }}>
             <Figure side={side} ranks={ranks} onPress={onPress} />
-            <T size={12} weight="500" color="secondary">{side === 'front' ? 'Frente' : 'Espalda'}</T>
+            <T size={12} weight="500" color="secondary">{side === 'front' ? t('Frente') : t('Espalda')}</T>
           </View>
         ))}
       </View>
       {/* Leyenda: qué rango es cada color */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', columnGap: 12, rowGap: 8 }} accessible accessibilityLabel={`Leyenda: sin entrenar, ${RANK_NAMES.join(', ')}`}>
-        <Legend color={alpha(colors.radioOff, 0.5)} label="Sin entrenar" />
-        {RANK_NAMES.map((n, i) => <Legend key={n} color={palette[i]} label={n} />)}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', columnGap: 12, rowGap: 8 }} accessible accessibilityLabel={`${t('Leyenda')}: ${t('sin entrenar')}, ${RANK_NAMES.map((n) => t(n)).join(', ')}`}>
+        <Legend color={alpha(colors.radioOff, 0.5)} label={t('Sin entrenar')} />
+        {RANK_NAMES.map((n, i) => <Legend key={n} color={palette[i]} label={t(n)} />)}
       </View>
     </View>
   );

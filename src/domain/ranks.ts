@@ -1,5 +1,6 @@
 // Teoría (gamificación, RF8): rangos con forma+nombre además del color (el color nunca va solo).
 // TODO: no hay algoritmo oficial; función pura con umbrales en tabla para poder ajustarla.
+import i18n from 'i18next';
 
 export const RANK_NAMES = ['Bronce', 'Plata', 'Oro', 'Rubí', 'Esmeralda', 'Diamante'] as const;
 export const RANK_SHAPES = ['●', '◆', '★', '♦', '⬢', '✦'] as const; // forma de apoyo al color
@@ -33,12 +34,12 @@ export function rankFromPoints(points: number): Rank {
   const progress = next === undefined ? 1 : (points - POINTS_PER_STEP[step]) / (next - POINTS_PER_STEP[step]);
   const tier = Math.floor(step / 3);
   const level = ((step % 3) + 1) as 1 | 2 | 3;
-  return { tier, level, progress: Math.min(1, Math.max(0, progress)), label: `${RANK_NAMES[tier]} ${ROMAN[level - 1]}` };
+  return { tier, level, progress: Math.min(1, Math.max(0, progress)), label: `${i18n.t(RANK_NAMES[tier])} ${ROMAN[level - 1]}` };
 }
 
 /** Nombre del siguiente escalón («Diamante III») o null si ya está en el máximo. */
 export function nextRankLabel(rank: Rank): string | null {
   const step = rank.tier * 3 + (rank.level - 1) + 1;
   if (step >= STEPS) return null;
-  return `${RANK_NAMES[Math.floor(step / 3)]} ${ROMAN[step % 3]}`;
+  return `${i18n.t(RANK_NAMES[Math.floor(step / 3)])} ${ROMAN[step % 3]}`;
 }

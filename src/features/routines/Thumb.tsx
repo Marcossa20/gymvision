@@ -1,5 +1,6 @@
 import React from 'react';
 import { Image, View, type ImageSourcePropType } from 'react-native';
+import i18n from 'i18next';
 import type { Equipment, Exercise, Muscle } from '../../data/seed';
 import { muscleImages } from '../workout/muscleImages';
 
@@ -19,8 +20,14 @@ export const equipmentLabels: Record<Equipment, string> = {
   mancuerna: 'Mancuerna', maquina: 'Máquina', polea: 'Polea', 'banda-elastica': 'Banda elástica',
 };
 
-export const muscleLabel = (m: Muscle) =>
-  ({ biceps: 'Bíceps', triceps: 'Tríceps', cuadriceps: 'Cuádriceps', gluteos: 'Glúteos', abdominales: 'Abdominales' } as Record<string, string>)[m] ?? m.charAt(0).toUpperCase() + m.slice(1);
+const MUSCLE_NAMES: Record<Muscle, string> = {
+  pecho: 'Pecho', hombros: 'Hombros', biceps: 'Bíceps', antebrazos: 'Antebrazos', abdominales: 'Abdominales', cuadriceps: 'Cuádriceps',
+  aductores: 'Aductores', abductores: 'Abductores', cuello: 'Cuello', trapecio: 'Trapecio', dorsales: 'Dorsales', triceps: 'Tríceps',
+  lumbar: 'Lumbar', gluteos: 'Glúteos', femoral: 'Femoral', gemelos: 'Gemelos',
+};
+/** Nombre del músculo traducido (los componentes que lo usan ya se re-renderizan al cambiar de idioma). */
+export const muscleLabel = (m: Muscle) => i18n.t(MUSCLE_NAMES[m]);
+export const equipLabel = (q: Equipment) => i18n.t(equipmentLabels[q]);
 
 /** Miniatura del ejercicio: músculo trabajado (fuerza) o icono de cardio/equipamiento. */
 export function ExThumb({ ex, size, radius = 14 }: { ex: Pick<Exercise, 'muscles' | 'equipment'>; size: number; radius?: number }) {

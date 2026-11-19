@@ -7,6 +7,7 @@ import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { useWorkout } from '../store/workout';
 import { useSettings } from '../store/settings';
+import i18n from 'i18next';
 import { notify } from './alerts';
 
 const CATEGORY = 'descanso';
@@ -31,8 +32,8 @@ async function schedule(endsAt: number) {
   if (!perm.granted) return;
   scheduledId = await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Descanso terminado',
-      body: 'Empieza tu siguiente serie.',
+      title: i18n.t('Descanso terminado'),
+      body: i18n.t('Empieza tu siguiente serie.'),
       categoryIdentifier: CATEGORY,
       sound: settings.sound ? 'default' : false,
     },
@@ -45,7 +46,7 @@ function restFinished() {
   const { restEndsAt, skipRest } = useWorkout.getState();
   if (!restEndsAt || Date.now() < restEndsAt) return;
   skipRest();
-  notify('descanso', 'Descanso terminado · empieza la siguiente serie');
+  notify('descanso', i18n.t('Descanso terminado · empieza la siguiente serie'));
 }
 
 function sync() {
@@ -71,10 +72,12 @@ export async function initNotifications() {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({ shouldShowBanner: false, shouldShowList: false, shouldPlaySound: false, shouldSetBadge: false }),
   });
-  await Notifications.setNotificationCategoryAsync(CATEGORY, [
-    { identifier: ACTION_START, buttonTitle: 'Empezar serie', options: { opensAppToForeground: true } },
+  const registerCategory = () => Notifications.setNotificationCategoryAsync(CATEGORY, [
+    { identifier: ACTION_START, buttonTitle: i18n.t('Empezar serie'), options: { opensAppToForeground: true } },
     { identifier: ACTION_PLUS30, buttonTitle: '+30 s', options: { opensAppToForeground: false } },
-  ]);
+  ]).catch(() => {});
+  await registerCategory();
+  i18n.on('languageChanged', () => void registerCategory()); // los botones de la notificación también cambian de idioma
   await Notifications.requestPermissionsAsync().catch(() => {});
 
   // Acciones de la notificación.

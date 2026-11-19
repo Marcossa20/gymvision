@@ -18,12 +18,14 @@ import { rankImages } from '../ranks/rankImages';
 import { useRanksDemo } from '../ranks/data';
 import { fmtWeight } from '../profile/format';
 import { BottomActions, ScreenBar, StatusPill } from './ui';
+import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 
 interface LastSession { weight: number; reps: number; sets: number; when: string }
 
 const when = (t: number) => {
   const d = Math.floor((Date.now() - t) / 86400000);
-  return d <= 0 ? 'Hoy' : d === 1 ? 'Ayer' : `Hace ${d} días`;
+  return d <= 0 ? i18n.t('Hoy') : d === 1 ? i18n.t('Ayer') : i18n.t('Hace {{n}} días', { n: d });
 };
 
 /** Última sesión de ese ejercicio (historial de Entrenar) o, en modo demostración, un ejemplo como el del Figma. */
@@ -34,10 +36,11 @@ function useLastSession(exerciseId: string): LastSession | null {
     const top = last.sets.reduce((a, b) => (b.weight > a.weight ? b : a));
     return { weight: top.weight, reps: top.reps, sets: last.sets.length, when: when(last.date) };
   }
-  return demo ? { weight: 32, reps: 12, sets: 3, when: 'Hace 2 días' } : null;
+  return demo ? { weight: 32, reps: 12, sets: 3, when: i18n.t('Hace {{n}} días', { n: 2 }) } : null;
 }
 
 export function MachineScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -48,28 +51,28 @@ export function MachineScreen() {
   if (!r.ok) return <Redirect href={{ pathname: '/gym/manual', params: { code: r.code ?? code ?? '', error: '1' } } as never} />;
   const ex = r.exercise;
   const rank = points !== undefined && points > 0 ? rankFromPoints(points) : null;
-  const name = ex.name.replace(/\s*\(máquina\)\s*$/i, '');
+  const name = t(ex.name).replace(/\s*\((máquina|machine)\)\s*$/i, '');
 
   const last = useLastSession(ex.id);
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScreenBar title="Máquina encontrada" icon="back" />
+      <ScreenBar title={t('Máquina encontrada')} icon="back" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, gap: 16 }}>
-        <StatusPill tone="brand" icon={<Check size={18} color={colors.brand} strokeWidth={2.5} />} label={`Código ${r.code} reconocido`} />
+        <StatusPill tone="brand" icon={<Check size={18} color={colors.brand} strokeWidth={2.5} />} label={t('Código {{code}} reconocido', { code: r.code })} />
         <Card style={{ borderRadius: 28, overflow: 'hidden' }}>
           <MuscleIllustration muscles={ex.muscles} width={width - 42} />
           <View style={{ paddingHorizontal: 20, paddingTop: 18, paddingBottom: 20, gap: 12 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <T size={22} weight="700" style={{ flex: 1 }} accessibilityRole="header">Máquina: {name}</T>
+              <T size={22} weight="700" style={{ flex: 1 }} accessibilityRole="header">{t('Máquina: {{name}}', { name })}</T>
               {rank ? (
-                <Image source={rankImages[rank.tier]} style={{ width: 44, height: 44 }} resizeMode="contain" accessible accessibilityLabel={`Rango ${rank.label}`} />
+                <Image source={rankImages[rank.tier]} style={{ width: 44, height: 44 }} resizeMode="contain" accessible accessibilityLabel={t('Rango {{label}}', { label: rank.label })} />
               ) : null}
             </View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {ex.muscles.map((m) => (
                 <View key={m} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: colors.surface2 }}>
-                  <T size={13} weight="500">{MUSCLE_LABELS[m]}</T>
+                  <T size={13} weight="500">{t(MUSCLE_LABELS[m])}</T>
                 </View>
               ))}
             </View>
@@ -78,13 +81,13 @@ export function MachineScreen() {
               <View style={{ flex: 1, gap: 2 }}>
                 {last ? (
                   <>
-                    <T size={15} weight="600">Última vez: {fmtWeight(last.weight)} × {last.reps}</T>
-                    <T size={12} color="secondary">{last.when} · {last.sets} series{rank ? ` · Rango ${RANK_NAMES[rank.tier]}` : ''}</T>
+                    <T size={15} weight="600">{t('Última vez: {{w}} × {{r}}', { w: fmtWeight(last.weight), r: last.reps })}</T>
+                    <T size={12} color="secondary">{last.when} · {t('{{n}} series', { n: last.sets })}{rank ? ` · ${t('Rango {{label}}', { label: t(RANK_NAMES[rank.tier]) })}` : ''}</T>
                   </>
                 ) : (
                   <>
-                    <T size={15} weight="600">Primera vez en esta máquina</T>
-                    <T size={12} color="secondary">{rank ? `Rango ${rank.label}` : 'Sin rango todavía'}</T>
+                    <T size={15} weight="600">{t('Primera vez en esta máquina')}</T>
+                    <T size={12} color="secondary">{rank ? t('Rango {{label}}', { label: rank.label }) : t('Sin rango todavía')}</T>
                   </>
                 )}
               </View>
@@ -93,8 +96,8 @@ export function MachineScreen() {
         </Card>
       </ScrollView>
       <BottomActions>
-        <Button variant="secondary" label="No es esta máquina" onPress={() => router.replace('/gym/scan' as never)} />
-        <Button label="Abrir ejercicio" onPress={() => router.replace(machineRoute(ex.id) as never)} icon={<ArrowRight size={22} color={colors.onBrand} />} />
+        <Button variant="secondary" label={t('No es esta máquina')} onPress={() => router.replace('/gym/scan' as never)} />
+        <Button label={t('Abrir ejercicio')} onPress={() => router.replace(machineRoute(ex.id) as never)} icon={<ArrowRight size={22} color={colors.onBrand} />} />
       </BottomActions>
     </SafeAreaView>
   );

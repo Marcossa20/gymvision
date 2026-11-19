@@ -18,8 +18,10 @@ import { BarChart } from './BarChart';
 import { fmtDayLabel, fmtDec, fmtDuration, fmtInt, fmtKg } from './format';
 import { useHistory, type HistoryItem } from './history';
 import { PERIODS, periodStats, type Metric, type Period } from './progress';
+import { useTranslation } from 'react-i18next';
 
 export function MuscleChip({ m, size = 'sm' }: { m: Muscle; size?: 'sm' | 'md' }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const palette = useRankColors();
   const { byMuscle } = useMuscleRanks();
@@ -28,7 +30,7 @@ export function MuscleChip({ m, size = 'sm' }: { m: Muscle; size?: 'sm' | 'md' }
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: md ? 7 : 6, paddingLeft: md ? 11 : 9, paddingRight: md ? 12 : 10, paddingVertical: md ? 6 : 5, borderRadius: md ? 14 : 12, backgroundColor: colors.surface2 }}>
       <View style={{ width: md ? 9 : 8, height: md ? 9 : 8, borderRadius: 5, backgroundColor: r ? palette[r.tier] : colors.textSecondary }} />
-      <T size={md ? 13 : 12} weight="500">{MUSCLE_LABELS[m]}</T>
+      <T size={md ? 13 : 12} weight="500">{t(MUSCLE_LABELS[m])}</T>
     </View>
   );
 }
@@ -43,25 +45,27 @@ export function Avatar({ size, uri }: { size: number; uri: string | null }) {
 }
 
 function WorkoutCard({ h }: { h: HistoryItem }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { colors } = useTheme();
   return (
-    <Card onPress={() => router.push(`/profile/workout/${h.id}` as never)} accessibilityLabel={`${fmtDayLabel(h.date)}, ${h.name}, ${fmtDuration(h.durationMin)}, ${h.sets} series`} style={{ paddingHorizontal: 16, paddingVertical: 14, gap: 6, borderWidth: 0 }}>
+    <Card onPress={() => router.push(`/profile/workout/${h.id}` as never)} accessibilityLabel={`${fmtDayLabel(h.date)}, ${t(h.name)}, ${fmtDuration(h.durationMin)}, ${t('{{n}} series', { n: h.sets })}`} style={{ paddingHorizontal: 16, paddingVertical: 14, gap: 6, borderWidth: 0 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <T size={11} weight="600" color="brand" style={{ flex: 1, letterSpacing: 0.6 }}>{fmtDayLabel(h.date)}</T>
         <ChevronRight size={18} color={colors.textSecondary} />
       </View>
-      <T size={17} weight="700">{h.name}</T>
-      <T size={12.5} color="secondary">{fmtDuration(h.durationMin)} · {h.sets} series</T>
+      <T size={17} weight="700">{t(h.name)}</T>
+      <T size={12.5} color="secondary">{fmtDuration(h.durationMin)} · {t('{{n}} series', { n: h.sets })}</T>
       {h.muscles.length ? <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingTop: 4 }}>{h.muscles.map((m) => <MuscleChip key={m} m={m} />)}</View> : null}
     </Card>
   );
 }
 
 function Delta({ cur, prev, fmt }: { cur: number; prev: number; fmt: (v: number) => string }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const d = cur - prev;
-  if (d === 0) return <T size={12} weight="600" color="secondary">= igual</T>;
+  if (d === 0) return <T size={12} weight="600" color="secondary">{t('= igual')}</T>;
   const up = d > 0;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
@@ -105,24 +109,25 @@ function Segmented<V extends string>({ options, value, onChange, pill }: { optio
 }
 
 function ProgressTab({ history }: { history: HistoryItem[] }) {
+  const { t, i18n: inst } = useTranslation();
   const { colors } = useTheme();
   const [metric, setMetric] = useState<Metric>('volume');
   const [period, setPeriod] = useState<Period>('week');
-  const s = useMemo(() => periodStats(history, period, metric), [history, period, metric]);
+  const s = useMemo(() => periodStats(history, period, metric), [history, period, metric, inst.language]); // eslint-disable-line react-hooks/exhaustive-deps
   const maxI = s.buckets.reduce((bi, b, i, arr) => (b.value > arr[bi].value ? i : bi), 0);
   const [sel, setSel] = useState<number | null>(null);
   const selected = sel !== null && sel < s.buckets.length ? sel : maxI;
   const pct = s.prevTotal > 0 ? Math.round(((s.total - s.prevTotal) / s.prevTotal) * 100) : null;
-  const fmtVal = metric === 'volume' ? (v: number) => `${fmtInt(v)} kg` : (v: number) => `${fmtInt(v)} series`;
+  const fmtVal = metric === 'volume' ? (v: number) => `${fmtInt(v)} kg` : (v: number) => t('{{n}} series', { n: fmtInt(v) });
   const reset = () => setSel(null);
 
   return (
     <View style={{ gap: 12, paddingTop: 16, paddingBottom: 18 }}>
       <Card style={{ padding: 16, gap: 14, borderWidth: 0 }}>
-        <Segmented options={[{ id: 'volume', label: 'Volumen (kg)' }, { id: 'sets', label: 'Nº de series' }]} value={metric} onChange={(v) => { setMetric(v); reset(); }} />
-        <Segmented pill options={PERIODS} value={period} onChange={(v) => { setPeriod(v); reset(); }} />
+        <Segmented options={[{ id: 'volume', label: t('Volumen (kg)') }, { id: 'sets', label: t('Nº de series') }]} value={metric} onChange={(v) => { setMetric(v); reset(); }} />
+        <Segmented pill options={PERIODS.map((p) => ({ ...p, label: t(p.label) }))} value={period} onChange={(v) => { setPeriod(v); reset(); }} />
         <View style={{ gap: 4 }}>
-          <T size={11} weight="600" color="secondary" style={{ letterSpacing: 0.8 }}>{metric === 'volume' ? 'VOLUMEN TOTAL' : 'SERIES TOTALES'}</T>
+          <T size={11} weight="600" color="secondary" style={{ letterSpacing: 0.8 }}>{metric === 'volume' ? t('VOLUMEN TOTAL') : t('SERIES TOTALES')}</T>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <T size={30} weight="700">{metric === 'volume' ? fmtKg(s.total) : fmtInt(s.total)}</T>
             {pct !== null ? (
@@ -132,35 +137,36 @@ function ProgressTab({ history }: { history: HistoryItem[] }) {
               </View>
             ) : null}
           </View>
-          <T size={12.5} color="secondary">{s.rangeLabel}{period !== 'all' ? ' · frente al periodo anterior' : ''}</T>
+          <T size={12.5} color="secondary">{s.rangeLabel}{period !== 'all' ? ` ${t('· frente al periodo anterior')}` : ''}</T>
         </View>
         <BarChart buckets={s.buckets} selected={selected} onSelect={setSel} format={fmtVal} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <MousePointerClick size={14} color={colors.textSecondary} />
-          <T size={12} color="secondary">Toca una barra para ver el detalle</T>
+          <T size={12} color="secondary">{t('Toca una barra para ver el detalle')}</T>
         </View>
       </Card>
       <View style={{ flexDirection: 'row', gap: 12 }}>
-        <Tile label="ENTRENOS" value={fmtInt(s.workouts)} delta={<Delta cur={s.workouts} prev={s.prevWorkouts} fmt={fmtInt} />} />
+        <Tile label={t('ENTRENOS')} value={fmtInt(s.workouts)} delta={<Delta cur={s.workouts} prev={s.prevWorkouts} fmt={fmtInt} />} />
         {metric === 'volume' ? (
-          <Tile label="SERIES" value={fmtInt(s.sets)} delta={<Delta cur={s.sets} prev={s.prevSets} fmt={fmtInt} />} />
+          <Tile label={t('SERIES')} value={fmtInt(s.sets)} delta={<Delta cur={s.sets} prev={s.prevSets} fmt={fmtInt} />} />
         ) : (
-          <Tile label="SERIES / ENTRENO" value={s.workouts ? fmtDec(s.sets / s.workouts) : '—'} delta={<Delta cur={s.workouts ? s.sets / s.workouts : 0} prev={s.prevWorkouts ? s.prevSets / s.prevWorkouts : 0} fmt={(v) => fmtDec(v)} />} />
+          <Tile label={t('SERIES / ENTRENO')} value={s.workouts ? fmtDec(s.sets / s.workouts) : '—'} delta={<Delta cur={s.workouts ? s.sets / s.workouts : 0} prev={s.prevWorkouts ? s.prevSets / s.prevWorkouts : 0} fmt={(v) => fmtDec(v)} />} />
         )}
       </View>
       <View style={{ flexDirection: 'row', gap: 12 }}>
         {metric === 'volume' ? (
-          <Tile label="TIEMPO" value={fmtDuration(s.minutes)} delta={<Delta cur={s.minutes} prev={s.prevMinutes} fmt={fmtDuration} />} />
+          <Tile label={t('TIEMPO')} value={fmtDuration(s.minutes)} delta={<Delta cur={s.minutes} prev={s.prevMinutes} fmt={fmtDuration} />} />
         ) : (
-          <Tile label="VOLUMEN" value={fmtKg(s.volume)} delta={<Delta cur={s.volume} prev={s.prevVolume} fmt={(v) => fmtKg(v).replace(' kg', '')} />} />
+          <Tile label={t('VOLUMEN')} value={fmtKg(s.volume)} delta={<Delta cur={s.volume} prev={s.prevVolume} fmt={(v) => fmtKg(v).replace(' kg', '')} />} />
         )}
-        <Tile label="RÉCORDS" value={fmtInt(s.records)} delta={<Delta cur={s.records} prev={s.prevRecords} fmt={fmtInt} />} />
+        <Tile label={t('RÉCORDS')} value={fmtInt(s.records)} delta={<Delta cur={s.records} prev={s.prevRecords} fmt={fmtInt} />} />
       </View>
     </View>
   );
 }
 
 export function ProfileScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const palette = useRankColors();
   const router = useRouter();
@@ -187,10 +193,10 @@ export function ProfileScreen() {
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 20, paddingRight: 8, paddingTop: 4 }}>
         <T size={19} weight="700" style={{ flex: 1 }} accessibilityRole="header" numberOfLines={1}>@{username}</T>
-        <Pressable accessibilityRole="button" accessibilityLabel="Editar perfil" onPress={() => router.push('/profile/edit' as never)} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Editar perfil')} onPress={() => router.push('/profile/edit' as never)} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
           <Pencil size={24} color={colors.textPrimary} />
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Ajustes" onPress={() => router.push('/settings' as never)} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Ajustes')} onPress={() => router.push('/settings' as never)} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
           <Settings size={24} color={colors.textPrimary} />
         </Pressable>
       </View>
@@ -201,29 +207,29 @@ export function ProfileScreen() {
           <View style={{ flex: 1, gap: 10 }}>
             <T size={21} weight="700">{name}</T>
             <View style={{ flexDirection: 'row', gap: 22 }}>
-              <View><T size={17} weight="700">{fmtInt(history.length)}</T><T size={12} weight="500" color="secondary">Entrenos</T></View>
-              <View><T size={17} weight="700" color="brand">{streak}</T><T size={12} weight="500" color="secondary">Racha</T></View>
-              <View><T size={17} weight="700" color={general ? palette[general.tier] : 'secondary'}>{general ? general.label : 'Sin rango'}</T><T size={12} weight="500" color="secondary">Nivel</T></View>
+              <View><T size={17} weight="700">{fmtInt(history.length)}</T><T size={12} weight="500" color="secondary">{t('Entrenos')}</T></View>
+              <View><T size={17} weight="700" color="brand">{streak}</T><T size={12} weight="500" color="secondary">{t('Racha')}</T></View>
+              <View><T size={17} weight="700" color={general ? palette[general.tier] : 'secondary'}>{general ? general.label : t('Sin rango')}</T><T size={12} weight="500" color="secondary">{t('Nivel')}</T></View>
             </View>
           </View>
         </View>
         <View style={{ flexDirection: 'row', paddingTop: 14 }} accessibilityRole="tablist">
-          <Tab id="entrenos" label="Entrenos" Icon={Dumbbell} />
-          <Tab id="progreso" label="Progreso" Icon={ChartLine} />
+          <Tab id="entrenos" label={t('Entrenos')} Icon={Dumbbell} />
+          <Tab id="progreso" label={t('Progreso')} Icon={ChartLine} />
         </View>
         {tab === 'entrenos' ? (
           <View style={{ gap: 10, paddingTop: 16, paddingBottom: 18 }}>
             {history.length === 0 ? (
               <Card style={{ padding: 20, gap: 6, alignItems: 'center', borderWidth: 0 }}>
                 <Dumbbell size={28} color={colors.textSecondary} />
-                <T size={16} weight="600">Aún no hay entrenos</T>
-                <T size={13} color="secondary" style={{ textAlign: 'center' }}>Cuando termines uno aparecerá aquí.</T>
+                <T size={16} weight="600">{t('Aún no hay entrenos')}</T>
+                <T size={13} color="secondary" style={{ textAlign: 'center' }}>{t('Cuando termines uno aparecerá aquí.')}</T>
               </Card>
             ) : history.map((h) => <WorkoutCard key={h.id} h={h} />)}
             {__DEV__ ? (
               <Pressable onPress={() => router.push('/lab')} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, minHeight: 48 }}>
                 <FlaskConical size={16} color={colors.textSecondary} />
-                <T size={13} color="secondary">Laboratorio de componentes (dev)</T>
+                <T size={13} color="secondary">{t('Laboratorio de componentes (dev)')}</T>
               </Pressable>
             ) : null}
           </View>

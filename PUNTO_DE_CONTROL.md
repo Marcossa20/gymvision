@@ -45,3 +45,11 @@
 - `Routine` usa `days: number[]` (0 = lunes) y los ejercicios pueden llevar `goal`/`target` (cardio). Guardado local con migración.
 - `assets/equipment/cardio.jpg` muestra un torso, no algo de cardio: revisar.
 - Modelo: Sonnet 5.5 vale para casi todo; Opus si fallan reordenar con el dedo, notificaciones, acelerómetro o NFC.
+
+## Traducciones (rama `marcos/traducciones`, SIN mezclar en `main`)
+- Infraestructura i18next: la clave es el texto en español; el inglés está en `src/i18n/en.json` (612 claves). `src/i18n/index.ts` sigue el ajuste de idioma.
+- Traducido **todo** (probado en web en English; mis pantallas probadas también en iPhone): Entrenar, entreno, resumen, rutinas, ajustes, avisos, notificaciones, fechas y nombres de ejemplo.
+- También traducidas las pantallas de Miguel Ángel (con su permiso, solo cambios `t('texto')`, sin tocar lógica): auth, gym (+ mensajes de `services/nfc.ts`), cardio, perfil y rangos. Los nombres de rango se traducen en `domain/ranks.ts` (`i18n.t`). Excepción: el Laboratorio (`features/lab`, solo dev) sigue en español.
+- Formato de números según idioma: español `1.234,5`, resto `1,234.5` (`fmtInt`, `fmtDec`, `fmtNum`, `fmtThousands`). Fechas del perfil derivadas de los nombres de día/mes traducidos.
+- Falta: probar lo de Miguel Ángel en el iPhone, que él lo revise (su agente puede buscar lo que falte), y mezclar. fr/de/it/pt se muestran en inglés.
+- Patrón para textos nuevos: `const { t } = useTranslation();` → `t('Texto en español')`; fuera de componentes `i18n.t(...)`; añadir la clave a `en.json`.

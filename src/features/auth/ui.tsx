@@ -8,10 +8,12 @@ import { AlertCircle, Check, Eye, EyeOff, type LucideIcon } from 'lucide-react-n
 import { T } from '../../components/ui';
 import { useTheme } from '../../theme/useTheme';
 import { alpha } from '../gym/ui';
+import { useTranslation } from 'react-i18next';
 
 export const Field = forwardRef<TextInputInstance, {
   label: string; icon: LucideIcon; error?: string | null; hint?: string; secure?: boolean; radius?: number;
 } & TextInputProps>(function Field({ label, icon: Icon, error, hint, secure, radius = 14, ...input }, ref) {
+  const { t } = useTranslation();
   const { colors, fs } = useTheme();
   const [hidden, setHidden] = useState(true);
   const [focused, setFocused] = useState(false);
@@ -33,7 +35,7 @@ export const Field = forwardRef<TextInputInstance, {
           style={{ flex: 1, minHeight: 48, color: colors.textPrimary, fontSize: fs(15.5), fontFamily: 'Inter_400Regular' }}
         />
         {secure ? (
-          <Pressable onPress={() => setHidden((h) => !h)} accessibilityRole="button" accessibilityLabel={hidden ? 'Mostrar contraseña' : 'Ocultar contraseña'} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable onPress={() => setHidden((h) => !h)} accessibilityRole="button" accessibilityLabel={hidden ? t('Mostrar contraseña') : t('Ocultar contraseña')} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
             {hidden ? <Eye size={20} color={colors.textSecondary} /> : <EyeOff size={20} color={colors.textSecondary} />}
           </Pressable>
         ) : null}
@@ -50,9 +52,10 @@ export const Field = forwardRef<TextInputInstance, {
 
 /** Requisito con check relleno (cumplido) o círculo vacío (pendiente): forma + texto, no solo color. */
 export function Rule({ ok, label }: { ok: boolean; label: string }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   return (
-    <View accessible accessibilityLabel={`${label}: ${ok ? 'cumplido' : 'pendiente'}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+    <View accessible accessibilityLabel={`${label}: ${ok ? t('cumplido') : t('pendiente')}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
       <View style={{ width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: ok ? colors.brand : 'transparent', borderWidth: ok ? 0 : 2, borderColor: colors.radioOff }}>
         {ok ? <Check size={12} color={colors.onBrand} strokeWidth={3} /> : null}
       </View>

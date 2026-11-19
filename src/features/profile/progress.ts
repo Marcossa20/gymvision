@@ -1,4 +1,5 @@
 // Agregación del historial por periodo para la gráfica de Progreso (función pura).
+import i18n from 'i18next';
 import type { HistoryItem } from './history';
 import { dayShort, monthName, monthShort, startOfDay } from './format';
 
@@ -59,18 +60,18 @@ function bucketsFor(period: Period, now: number, first: number): { buckets: Omit
   };
   if (period === '3m') {
     const b = months(3);
-    return { buckets: b, rangeLabel: 'Últimos 3 meses', span: [b[0].start, b[b.length - 1].end] };
+    return { buckets: b, rangeLabel: i18n.t('Últimos 3 meses'), span: [b[0].start, b[b.length - 1].end] };
   }
   if (period === 'year') {
     const y = d.getFullYear();
     const b = Array.from({ length: 12 }, (_, m) => ({ start: monthStart(y, m), end: monthStart(y, m + 1), label: monthShort(m)[0], long: `${monthName(m).toUpperCase()} ${y}` }));
-    return { buckets: b, rangeLabel: `Año ${y}`, span: [monthStart(y, 0), monthStart(y + 1, 0)] };
+    return { buckets: b, rangeLabel: i18n.t('Año {{y}}', { y }), span: [monthStart(y, 0), monthStart(y + 1, 0)] };
   }
   // Todo: por meses desde el primer entreno (máx. 12 barras)
   const f = new Date(first);
   const n = Math.min(12, Math.max(1, (d.getFullYear() - f.getFullYear()) * 12 + d.getMonth() - f.getMonth() + 1));
   const b = months(n, n > 6);
-  return { buckets: b, rangeLabel: 'Desde el principio', span: [Math.min(first, b[0].start), b[b.length - 1].end] };
+  return { buckets: b, rangeLabel: i18n.t('Desde el principio'), span: [Math.min(first, b[0].start), b[b.length - 1].end] };
 }
 
 export function periodStats(items: HistoryItem[], period: Period, metric: Metric, now = Date.now()): PeriodStats {

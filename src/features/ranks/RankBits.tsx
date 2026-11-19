@@ -5,17 +5,19 @@ import { Lock } from 'lucide-react-native';
 import type { Rank } from '../../domain/ranks';
 import { useTheme } from '../../theme/useTheme';
 import { rankImages } from './rankImages';
+import { useTranslation } from 'react-i18next';
 
 export function RankBadge({ rank, size }: { rank: Rank | null; size: number }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   if (!rank) {
     return (
-      <View accessible accessibilityLabel="Sin rango" style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
+      <View accessible accessibilityLabel={t('Sin rango')} style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
         <Lock size={Math.round(size * 0.45)} color={colors.textSecondary} />
       </View>
     );
   }
-  return <Image source={rankImages[rank.tier]} style={{ width: size, height: size }} resizeMode="contain" accessible accessibilityLabel={`Rango ${rank.label}`} />;
+  return <Image source={rankImages[rank.tier]} style={{ width: size, height: size }} resizeMode="contain" accessible accessibilityLabel={t('Rango {{label}}', { label: rank.label })} />;
 }
 
 export function Bar({ progress, color, height = 6 }: { progress: number; color: string; height?: number }) {
