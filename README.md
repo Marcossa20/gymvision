@@ -35,6 +35,8 @@ Sin móvil: `npx expo start --web` abre una versión en el navegador (sin vibrac
 | **2 · Baja visión y mayores** | Mismo menú: tamaño de texto en 4 niveles, alto contraste (AAA), tema claro/oscuro/sistema. Objetivos táctiles ≥ 48 dp. |
 | **3 · Discapacidad auditiva / ruido del gimnasio** | *Ajustes → Notificaciones*: vibración, sonido y aviso visual. Ningún aviso depende solo del sonido: cada evento (serie guardada, fin de descanso, subida de rango, error…) tiene **vibración con patrón propio + aviso visual** y, opcionalmente, sonido. |
 
+**Idiomas:** *Ajustes → Idioma* cambia al instante toda la app entre español, inglés, francés, alemán, italiano y portugués (también los separadores de miles y decimales).
+
 ## Pantallas principales
 
 - **Rangos:** nivel general, mapa muscular frente/espalda coloreado por rango, rangos por grupo y detalle de cada músculo.
@@ -49,6 +51,7 @@ Los componentes que pide la asignatura (háptica, color y contraste, tolerancia 
 ## Cómo está hecha
 
 - **React Native + TypeScript** con **Expo** (SDK 58) y **expo-router**. Estado con Zustand y persistencia local con AsyncStorage.
+- Idiomas con `i18next`: la clave es el texto en español y cada idioma vive en `src/i18n/<idioma>.json`.
 - Sensores: `expo-camera` (QR), `expo-sensors` (acelerómetro), `react-native-nfc-manager` (NFC), `expo-haptics`.
 - Todos los colores y tamaños salen de `src/theme/`, así un único ajuste cambia toda la app.
 - Cada módulo clave lleva un comentario `// Teoría: …` que enlaza la decisión de diseño con la teoría de la asignatura.
@@ -65,6 +68,12 @@ src/
 ```
 
 Más detalle del diseño y los requisitos en [`CLAUDE.md`](CLAUDE.md); reparto del trabajo en [`REPARTO.md`](REPARTO.md).
+
+## Qué no incluye
+
+- **Widget de inicio y pantalla de bloqueo con el descanso:** requieren código nativo (Live Activities en iOS); se descartaron. El fin de descanso sí avisa con una notificación del sistema con acciones.
+- **Servidor:** no hay. Las cuentas, rutinas y entrenos viven solo en el móvil.
+- **NFC real en Expo Go:** ver «Limitaciones de Expo Go» arriba.
 
 ## Comandos útiles
 
