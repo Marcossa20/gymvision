@@ -14,6 +14,8 @@ import { useCardio, type CardioSession } from '../../store/cardio';
 import { useWorkout, type ActiveExercise } from '../../store/workout';
 import { useTheme } from '../../theme/useTheme';
 import { Sheet } from '../routines/AddExerciseScreen';
+import { exerciseVideos } from './exerciseVideos';
+import { TutorialSheet } from './TutorialSheet';
 import { ExThumb, muscleLabel } from '../routines/Thumb';
 import { exerciseImages } from '../routines/exerciseImages';
 import { muscleImages } from './muscleImages';
@@ -110,6 +112,7 @@ export function ActiveWorkoutScreen() {
   const [confirm, setConfirm] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [replaceOpen, setReplaceOpen] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const cardioSessions = useCardio((st) => st.sessions);
   const cardioDone = (id: string) => (a ? cardioSessions.find((x) => x.exerciseId === id && x.date >= a.startedAt) : undefined);
 
@@ -149,6 +152,7 @@ export function ActiveWorkoutScreen() {
     if (item.sets.some((s) => s.done)) return notify('error', t('Ya has hecho series de este ejercicio: no se puede reemplazar'));
     setReplaceOpen(true);
   };
+  const openTutorial = () => (exerciseVideos[ex.id] ? setTutorialOpen(true) : notify('info', t('Este ejercicio aún no tiene tutorial')));
   const similar = (e: typeof ex) => (ex.muscles[0] && e.muscles.includes(ex.muscles[0]) ? 0 : 1);
   const alternatives = exercises.filter((e) => e.id !== item.exerciseId && e.type === ex.type && !a.items.some((it) => it.exerciseId === e.id)).sort((x, y) => similar(x) - similar(y));
 
@@ -198,7 +202,7 @@ export function ActiveWorkoutScreen() {
 
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {[{ l: 'Tutorial', I: Play }, { l: 'Reemplazar', I: Repeat }, { l: 'Notas', I: Pencil }].map(({ l, I }) => (
-            <Pressable key={l} accessibilityRole="button" accessibilityLabel={t(l)} onPress={() => (l === 'Reemplazar' ? tryReplace() : l === 'Notas' ? setNotesOpen((o) => !o) : notify('info', t('{{what}}: próximamente', { what: t(l) })))} style={{ flex: 1, minHeight: 48, borderRadius: 22, backgroundColor: colors.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Pressable key={l} accessibilityRole="button" accessibilityLabel={t(l)} onPress={() => (l === 'Tutorial' ? openTutorial() : l === 'Reemplazar' ? tryReplace() : l === 'Notas' ? setNotesOpen((o) => !o) : notify('info', t('{{what}}: próximamente', { what: t(l) })))} style={{ flex: 1, minHeight: 48, borderRadius: 22, backgroundColor: colors.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               <I size={16} color={colors.textPrimary} /><T size={13} weight="500">{t(l)}</T>
             </Pressable>
           ))}
@@ -285,6 +289,8 @@ export function ActiveWorkoutScreen() {
           </View>
         </View>
       </Modal>
+
+      {tutorialOpen ? <TutorialSheet exerciseId={ex.id} onClose={() => setTutorialOpen(false)} /> : null}
 
       <Sheet title={t('Reemplazar ejercicio')} visible={replaceOpen} onClose={() => setReplaceOpen(false)}>
         {alternatives.length === 0 ? <T size={15} color="secondary">{t('No hay ejercicios parecidos para reemplazar.')}</T> : null}

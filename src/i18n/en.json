@@ -651,5 +651,9 @@
   "Abductores (máquina)": "Hip abduction (machine)",
   "Plancha": "Plank",
   "Crunch en máquina": "Ab crunch (machine)",
-  "Elevación de piernas colgado": "Hanging leg raise"
+  "Elevación de piernas colgado": "Hanging leg raise",
+  "Este ejercicio aún no tiene tutorial": "This exercise doesn't have a tutorial yet",
+  "Pausar animación": "Pause animation",
+  "Reproducir animación": "Play animation",
+  "Animación del movimiento: {{name}}": "Movement animation: {{name}}"
 }

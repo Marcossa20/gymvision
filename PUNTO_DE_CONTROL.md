@@ -40,6 +40,8 @@
 
 ## Notas
 - Imágenes de ejercicio: 30 generadas con apimart (`gpt-image-2-ext`, 1K, referencia = silueta de `assets/cardio/correr.png`), reducidas a 512 px en `assets/exercises/` (~500 KB en total) y mapeadas en `features/routines/exerciseImages.ts`. Se usan en miniaturas y en la pantalla de entreno; sin imagen propia se usa la del músculo. Coste total: $0,2635. Los 9 ejercicios de fuerza originales siguen con la silueta del músculo.
+- Vídeos de tutorial: 29 clips de 2-5 s (sin audio, 480 px, ~850 KB en total) en `assets/videos/<id>.mp4`, mapeados en `features/workout/exerciseVideos.ts`. El botón «Tutorial» del entreno abre `TutorialSheet` (reproduce en bucle, con botón «Pausar animación»). Dependencia nueva: `expo-video`. Faltan clips de los 9 ejercicios originales y la plancha (sin vídeo: avisa «aún no tiene tutorial»).
+- Barra de pestañas: con el texto al máximo la etiqueta «Mi gimnasio» pasa a dos líneas y la barra crece (ya no se recorta).
 - Catálogo ampliado: 31 ejercicios nuevos (45 en total) que cubren los 16 músculos y todos los equipamientos. Máquinas nuevas con código manual: PB-0102, 0176, 0467, 0471, 0482, 0493, 0494 y 0510 (B las usa sin cambios vía `exerciseByCode`). Cardio: falta Cinta y Comba (Cinta necesita su entrada en `features/cardio/catalog.ts`, de B; Comba no tiene imagen).
 - Resumen del entreno y Progreso de rango ya siguen el Figma (récords, músculos trabajados, mejora de rango del músculo). `WorkoutRecord` tiene campos opcionales nuevos `records`, `muscles` y `rankDelta`.
 - El aviso visual (banner) se ve sobre la cabecera, pero sin acción («Deshacer») no captura toques: «Terminar» sigue pulsable (comprobado en web). Con «Deshacer» sí captura toques unos 6 s.
