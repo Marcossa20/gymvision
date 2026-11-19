@@ -15,6 +15,7 @@ import { useWorkout, type ActiveExercise } from '../../store/workout';
 import { useTheme } from '../../theme/useTheme';
 import { Sheet } from '../routines/AddExerciseScreen';
 import { ExThumb, muscleLabel } from '../routines/Thumb';
+import { exerciseImages } from '../routines/exerciseImages';
 import { muscleImages } from './muscleImages';
 import { ScrollLockContext, useScrollLock } from './scrollLock';
 import { Wheel } from './Wheel';
@@ -189,7 +190,7 @@ export function ActiveWorkoutScreen() {
         </ScrollView>
 
         <View style={{ height: 166, borderRadius: 24, backgroundColor: '#070707', borderWidth: 1, borderColor: colors.divider, alignItems: 'center', justifyContent: 'center', gap: 6, overflow: 'hidden' }}>
-          {ex.type === 'cardio' ? <ExThumb ex={ex} size={138} radius={16} /> : ex.muscles[0] ? <Image source={muscleImages[ex.muscles[0]]} style={{ width: '100%', height: 138 }} resizeMode="cover" accessibilityIgnoresInvertColors /> : null}
+          {ex.type === 'cardio' ? <ExThumb ex={ex} size={138} radius={16} /> : exerciseImages[ex.id] ? <Image source={exerciseImages[ex.id]} style={{ width: '100%', height: 138 }} resizeMode="contain" accessibilityIgnoresInvertColors /> : ex.muscles[0] ? <Image source={muscleImages[ex.muscles[0]]} style={{ width: '100%', height: 138 }} resizeMode="cover" accessibilityIgnoresInvertColors /> : null}
           <T size={13} weight="500" color="secondary">{ex.muscles.map(muscleLabel).join(' · ') || t('Cardio')}</T>
         </View>
 
