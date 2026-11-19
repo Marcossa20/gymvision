@@ -60,7 +60,6 @@ export function LanguageScreen() {
       <Section>
         {ids.map((id, i) => <RadioRow key={id} label={languageNames[id]} selected={language === id} onPress={() => set('language', id)} last={i === ids.length - 1} />)}
       </Section>
-      <T size={12.5} color="secondary" style={{ paddingTop: 12, paddingHorizontal: 4 }}>{t('Español e inglés están traducidos. Los demás idiomas se muestran en inglés por ahora.')}</T>
     </SettingsScreen>
   );
 }

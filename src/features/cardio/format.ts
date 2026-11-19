@@ -2,11 +2,15 @@ import i18n from 'i18next';
 // Formato en español: miles con punto (3.120), decimales con coma (2,4 km), fechas «viernes 16 de octubre».
 // (Intl agrupa los miles solo a partir de 5 cifras en es-ES, por eso se hace a mano.)
 
-const es = () => !i18n.language || i18n.language.startsWith('es');
+// Separadores según idioma: es/de/it/pt → 1.234,5 · fr → 1 234,5 · en → 1,234.5
+const SEP: Record<string, { thousands: string; decimal: string }> = {
+  en: { thousands: ',', decimal: '.' }, fr: { thousands: ' ', decimal: ',' },
+};
+const sep = () => SEP[(i18n.language || 'es').slice(0, 2)] ?? { thousands: '.', decimal: ',' };
 
-export const fmtInt = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, es() ? '.' : ',');
+export const fmtInt = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, sep().thousands);
 
-export const fmtDec = (n: number, digits = 1) => (es() ? n.toFixed(digits).replace('.', ',') : n.toFixed(digits));
+export const fmtDec = (n: number, digits = 1) => n.toFixed(digits).replace('.', sep().decimal);
 
 /** mm:ss o h:mm:ss */
 export function fmtClock(ms: number) {
