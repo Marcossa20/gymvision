@@ -43,7 +43,7 @@
 - El aviso visual (banner) se ve sobre la cabecera, pero sin acción («Deshacer») no captura toques: «Terminar» sigue pulsable (comprobado en web). Con «Deshacer» sí captura toques unos 6 s.
 - Cuenta de demostración fija en `store/auth.ts` (miguel@correo.com): vale para la exposición; el hash es una simulación, no seguridad real.
 - `Routine` usa `days: number[]` (0 = lunes) y los ejercicios pueden llevar `goal`/`target` (cardio). Guardado local con migración.
-- `assets/equipment/cardio.jpg` muestra un torso, no algo de cardio: revisar.
+- El equipamiento «Cardio» usa `assets/cardio/correr.png` (el antiguo `equipment/cardio.jpg` mostraba un torso y se eliminó).
 - Modelo: Sonnet 5.5 vale para casi todo; Opus si fallan reordenar con el dedo, notificaciones, acelerómetro o NFC.
 
 ## Traducciones (rama `marcos/traducciones`, SIN mezclar en `main`)

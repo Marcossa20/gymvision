@@ -5,7 +5,7 @@ import type { Equipment, Exercise, Muscle } from '../../data/seed';
 import { muscleImages } from '../workout/muscleImages';
 
 export const equipmentImages: Record<Equipment, ImageSourcePropType> = {
-  cardio: require('../../../assets/equipment/cardio.jpg'),
+  cardio: require('../../../assets/cardio/correr.png'),
   'sin-equipamiento': require('../../../assets/equipment/sin-equipamiento.jpg'),
   calistenia: require('../../../assets/equipment/calistenia.jpg'),
   barra: require('../../../assets/equipment/barra.jpg'),
