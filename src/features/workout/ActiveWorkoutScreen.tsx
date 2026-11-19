@@ -1,18 +1,19 @@
 // Teoría: RF5/RF6 — registro con un toque, peso deslizando, descanso integrado en la misma pantalla (no hay pantalla de descanso).
 // Teoría: RNF3 — borrar deslizando hacia un lado con «Deshacer»; terminar pide confirmación.
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, Modal, PanResponder, Pressable, ScrollView, View } from 'react-native';
+import { Image, Modal, PanResponder, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Check, ChevronDown, Footprints, Pencil, Play, Plus, Repeat, SkipForward, Timer, Trash2 } from 'lucide-react-native';
 import { Button, T } from '../../components/ui';
-import { exerciseById } from '../../data/seed';
+import { exerciseById, exercises } from '../../data/seed';
 import { fmtClock, fmtNum } from '../../domain/format';
 import { notify } from '../../services/alerts';
 import { hapticTick } from '../../services/haptics';
 import { useCardio, type CardioSession } from '../../store/cardio';
 import { useWorkout, type ActiveExercise } from '../../store/workout';
 import { useTheme } from '../../theme/useTheme';
+import { Sheet } from '../routines/AddExerciseScreen';
 import { ExThumb, muscleLabel } from '../routines/Thumb';
 import { muscleImages } from './muscleImages';
 import { ScrollLockContext, useScrollLock } from './scrollLock';
@@ -101,11 +102,13 @@ export function ActiveWorkoutScreen() {
   const router = useRouter();
   const a = useWorkout((s) => s.active);
   const restEndsAt = useWorkout((s) => s.restEndsAt);
-  const { toggleSet, setWeight, setReps, addSet, removeSet, adjustRest, skipRest, finish, discard } = useWorkout.getState();
+  const { setNotes, replaceExercise, toggleSet, setWeight, setReps, addSet, removeSet, adjustRest, skipRest, finish, discard } = useWorkout.getState();
   const now = useNow();
   const [exIndex, setExIndex] = useState(0);
   const [scrollLocked, setScrollLocked] = useState(false);
   const [confirm, setConfirm] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [replaceOpen, setReplaceOpen] = useState(false);
   const cardioSessions = useCardio((st) => st.sessions);
   const cardioDone = (id: string) => (a ? cardioSessions.find((x) => x.exerciseId === id && x.date >= a.startedAt) : undefined);
 
@@ -139,6 +142,14 @@ export function ActiveWorkoutScreen() {
   const remaining = restEndsAt ? Math.max(0, Math.ceil((restEndsAt - now) / 1000)) : 0;
   const totalRest = item.restSec;
   const elapsed = (now - a.startedAt) / 1000;
+
+  // Reemplazar: solo si aún no hay series hechas (RNF3: no se pierde nada sin avisar) y por un ejercicio parecido.
+  const tryReplace = () => {
+    if (item.sets.some((s) => s.done)) return notify('error', t('Ya has hecho series de este ejercicio: no se puede reemplazar'));
+    setReplaceOpen(true);
+  };
+  const similar = (e: typeof ex) => (ex.muscles[0] && e.muscles.includes(ex.muscles[0]) ? 0 : 1);
+  const alternatives = exercises.filter((e) => e.id !== item.exerciseId && e.type === ex.type && !a.items.some((it) => it.exerciseId === e.id)).sort((x, y) => similar(x) - similar(y));
 
   const done = () => { finishing.current = true; const rec = finish(); if (rec) router.replace('/workout/summary'); else finishing.current = false; };
 
@@ -186,11 +197,19 @@ export function ActiveWorkoutScreen() {
 
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {[{ l: 'Tutorial', I: Play }, { l: 'Reemplazar', I: Repeat }, { l: 'Notas', I: Pencil }].map(({ l, I }) => (
-            <Pressable key={l} accessibilityRole="button" accessibilityLabel={t(l)} onPress={() => notify('info', t('{{what}}: próximamente', { what: t(l) }))} style={{ flex: 1, minHeight: 48, borderRadius: 22, backgroundColor: colors.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Pressable key={l} accessibilityRole="button" accessibilityLabel={t(l)} onPress={() => (l === 'Reemplazar' ? tryReplace() : l === 'Notas' ? setNotesOpen((o) => !o) : notify('info', t('{{what}}: próximamente', { what: t(l) })))} style={{ flex: 1, minHeight: 48, borderRadius: 22, backgroundColor: colors.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               <I size={16} color={colors.textPrimary} /><T size={13} weight="500">{t(l)}</T>
             </Pressable>
           ))}
         </View>
+
+        {notesOpen || item.notes ? (
+          <TextInput
+            accessibilityLabel={t('Notas')} value={item.notes ?? ''} onChangeText={(v) => setNotes(exIndex, v)} multiline maxLength={200} textAlignVertical="top"
+            placeholder={t('Ej. Banco a 30°, asiento en la muesca 3')} placeholderTextColor={colors.radioOff} selectionColor={colors.brand}
+            style={{ minHeight: 72, borderRadius: 16, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.divider, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, fontFamily: 'Inter_400Regular', color: colors.textPrimary }}
+          />
+        ) : null}
 
         {ex.type === 'cardio' ? (
           <CardioPanel item={item} session={cardioDone(item.exerciseId)} onStart={() => router.push({ pathname: '/cardio/run', params: { exerciseId: item.exerciseId, ...(item.goal ? { goal: item.goal } : {}), ...(item.target ? { target: String(item.target) } : {}) } } as never)} />
@@ -265,6 +284,17 @@ export function ActiveWorkoutScreen() {
           </View>
         </View>
       </Modal>
+
+      <Sheet title={t('Reemplazar ejercicio')} visible={replaceOpen} onClose={() => setReplaceOpen(false)}>
+        {alternatives.length === 0 ? <T size={15} color="secondary">{t('No hay ejercicios parecidos para reemplazar.')}</T> : null}
+        {alternatives.map((e) => (
+          <Pressable key={e.id} accessibilityRole="button" accessibilityLabel={t(e.name)} onPress={() => { if (replaceExercise(exIndex, e.id)) { setReplaceOpen(false); notify('info', t('Ejercicio reemplazado')); } }}
+            style={{ minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 6, borderRadius: 14, borderWidth: 1, borderColor: colors.divider }}>
+            <ExThumb ex={e} size={52} />
+            <T size={15} weight="600" style={{ flex: 1 }}>{t(e.name)}</T>
+          </Pressable>
+        ))}
+      </Sheet>
     </SafeAreaView>
   );
 }

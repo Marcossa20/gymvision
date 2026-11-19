@@ -35,7 +35,7 @@
 1. Probar todo en el iPhone y corregir (vibración, gestos, reordenar, notificaciones, cámara QR, pasos).
 2. i18n con `i18next` (es + en; hoy todo en español).
 3. Widget / pantalla de bloqueo (nativo; simulado).
-4. Leídas del Figma y ajustadas: Crear ejercicio (nombre, músculo principal, equipamiento, notas; «Configurar ejercicio» lo añade a la rutina y abre su configuración), Mis rutinas vacío y Resultados Cardio. Siguen siendo avisos: «Reemplazar», «Tutorial» y «Notas» del entreno.
+4. Leídas del Figma y ajustadas: Crear ejercicio (nombre, músculo principal, equipamiento, notas; «Configurar ejercicio» lo añade a la rutina y abre su configuración), Mis rutinas vacío y Resultados Cardio. Del entreno: «Notas» (por ejercicio; parte de la nota de la rutina) y «Reemplazar» (solo si aún no hay series hechas) ya funcionan; «Tutorial» sigue siendo un aviso (falta contenido).
 5. Revisión final de accesibilidad con lector de pantalla y prueba en Android.
 
 ## Notas

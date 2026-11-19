@@ -619,5 +619,10 @@
   "Músculo principal": "Main muscle",
   "Elige un músculo": "Choose a muscle",
   "Notas (opcional)": "Notes (optional)",
-  "Ej. Pausa de 1 s abajo, banco a 30°": "E.g. 1 s pause at the bottom, bench at 30°"
+  "Ej. Pausa de 1 s abajo, banco a 30°": "E.g. 1 s pause at the bottom, bench at 30°",
+  "Sin sesión": "Signed out",
+  "Ya has hecho series de este ejercicio: no se puede reemplazar": "You've already done sets of this exercise: it can't be replaced",
+  "Reemplazar ejercicio": "Replace exercise",
+  "Ejercicio reemplazado": "Exercise replaced",
+  "No hay ejercicios parecidos para reemplazar.": "There are no similar exercises to swap in."
 }

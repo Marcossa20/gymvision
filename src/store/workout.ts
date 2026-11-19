@@ -9,7 +9,7 @@ import { notify } from '../services/alerts';
 import { pointsFor, rankFromPoints } from '../domain/ranks';
 
 export interface SetItem { weight: number; reps: number; done: boolean }
-export interface ActiveExercise { exerciseId: string; restSec: number; sets: SetItem[]; /** Cardio: objetivo único (min | pasos | km). */ goal?: 'time' | 'steps' | 'distance'; target?: number }
+export interface ActiveExercise { exerciseId: string; restSec: number; sets: SetItem[]; /** Cardio: objetivo único (min | pasos | km). */ goal?: 'time' | 'steps' | 'distance'; target?: number; /** Nota del ejercicio (se rellena con la de la rutina). */ notes?: string }
 export interface ActiveWorkout { routineId: string; name: string; startedAt: number; items: ActiveExercise[] }
 export interface LastSets { date: number; sets: { weight: number; reps: number }[] }
 /** Récord personal: más peso que tu mejor marca anterior en ese ejercicio. */
@@ -48,6 +48,9 @@ interface WorkoutState {
   addSet: (ex: number) => void;
   removeSet: (ex: number, set: number) => void;
   undoRemove: () => void;
+  setNotes: (ex: number, notes: string) => void;
+  /** Cambia el ejercicio en curso por otro (solo si aún no hay series hechas). */
+  replaceExercise: (ex: number, exerciseId: string) => boolean;
   adjustRest: (deltaSec: number) => void;
   skipRest: () => void;
   finish: () => WorkoutRecord | null;
@@ -83,7 +86,7 @@ export const useWorkout = create<WorkoutState>()(
           active: {
             routineId, name: r.name, startedAt: Date.now(),
             items: r.exercises.map((e) => ({
-              exerciseId: e.exerciseId, restSec: e.restSec, goal: e.goal, target: e.target,
+              exerciseId: e.exerciseId, restSec: e.restSec, goal: e.goal, target: e.target, notes: e.notes,
               sets: Array.from({ length: e.sets }, () => ({ weight: e.weight, reps: e.reps, done: false })),
             })),
           },
@@ -196,6 +199,20 @@ export const useWorkout = create<WorkoutState>()(
       },
 
       discard: () => set({ active: null, restEndsAt: null }),
+      setNotes: (ex, notes) => {
+        const a = get().active; if (!a) return;
+        set({ active: { ...a, items: a.items.map((it, i) => (i === ex ? { ...it, notes } : it)) } });
+      },
+      replaceExercise: (ex, exerciseId) => {
+        const a = get().active; const cur = a?.items[ex];
+        if (!a || !cur || cur.sets.some((s) => s.done) || a.items.some((it) => it.exerciseId === exerciseId)) return false;
+        const last = get().lastSets[exerciseId]?.sets[0];
+        const next: ActiveExercise = exerciseById(exerciseId).type === 'cardio'
+          ? { exerciseId, restSec: 0, sets: [{ weight: 0, reps: 1, done: false }], goal: 'time', target: 30 }
+          : { exerciseId, restSec: cur.restSec, sets: cur.sets.map(() => ({ weight: last?.weight ?? 20, reps: last?.reps ?? 10, done: false })) };
+        set({ active: { ...a, items: a.items.map((it, i) => (i === ex ? next : it)) } });
+        return true;
+      },
 
       addCustomExercise: (e) => { registerExercise(e); set({ customExercises: [...get().customExercises, e] }); },
       duplicateRoutine: (id) => {
