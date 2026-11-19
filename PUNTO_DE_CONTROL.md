@@ -35,15 +35,17 @@
 1. Probar todo en el iPhone y corregir (vibración, gestos, reordenar, notificaciones, cámara QR, pasos).
 2. i18n con `i18next` (es + en; hoy todo en español).
 3. Widget / pantalla de bloqueo (nativo; simulado).
-4. Pantallas sin leer del Figma: Crear ejercicio, Mis rutinas vacío, Resultados Cardio; «Reemplazar», «Tutorial» y «Notas» del entreno son avisos.
+4. Leídas del Figma y ajustadas: Crear ejercicio (nombre, músculo principal, equipamiento, notas; «Configurar ejercicio» lo añade a la rutina y abre su configuración), Mis rutinas vacío y Resultados Cardio. Del entreno: «Notas» (por ejercicio; parte de la nota de la rutina) y «Reemplazar» (solo si aún no hay series hechas) ya funcionan; «Tutorial» sigue siendo un aviso (falta contenido).
 5. Revisión final de accesibilidad con lector de pantalla y prueba en Android.
 
 ## Notas
+- Imágenes de ejercicio: 30 generadas con apimart (`gpt-image-2-ext`, 1K, referencia = silueta de `assets/cardio/correr.png`), reducidas a 512 px en `assets/exercises/` (~500 KB en total) y mapeadas en `features/routines/exerciseImages.ts`. Se usan en miniaturas y en la pantalla de entreno; sin imagen propia se usa la del músculo. Coste total: $0,2635. Los 9 ejercicios de fuerza originales siguen con la silueta del músculo.
+- Catálogo ampliado: 31 ejercicios nuevos (45 en total) que cubren los 16 músculos y todos los equipamientos. Máquinas nuevas con código manual: PB-0102, 0176, 0467, 0471, 0482, 0493, 0494 y 0510 (B las usa sin cambios vía `exerciseByCode`). Cardio: falta Cinta y Comba (Cinta necesita su entrada en `features/cardio/catalog.ts`, de B; Comba no tiene imagen).
 - Resumen del entreno y Progreso de rango ya siguen el Figma (récords, músculos trabajados, mejora de rango del músculo). `WorkoutRecord` tiene campos opcionales nuevos `records`, `muscles` y `rankDelta`.
-- El aviso visual (banner) tapa unos segundos la cabecera de la pantalla de entreno, incluido el botón «Terminar»: valorar moverlo o hacerlo no bloqueante.
+- El aviso visual (banner) se ve sobre la cabecera, pero sin acción («Deshacer») no captura toques: «Terminar» sigue pulsable (comprobado en web). Con «Deshacer» sí captura toques unos 6 s.
 - Cuenta de demostración fija en `store/auth.ts` (miguel@correo.com): vale para la exposición; el hash es una simulación, no seguridad real.
 - `Routine` usa `days: number[]` (0 = lunes) y los ejercicios pueden llevar `goal`/`target` (cardio). Guardado local con migración.
-- `assets/equipment/cardio.jpg` muestra un torso, no algo de cardio: revisar.
+- El equipamiento «Cardio» usa `assets/cardio/correr.png` (el antiguo `equipment/cardio.jpg` mostraba un torso y se eliminó).
 - Modelo: Sonnet 5.5 vale para casi todo; Opus si fallan reordenar con el dedo, notificaciones, acelerómetro o NFC.
 
 ## Traducciones (rama `marcos/traducciones`, SIN mezclar en `main`)

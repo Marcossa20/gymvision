@@ -22,21 +22,19 @@ export function AccountScreen() {
 
   const cambiarPassword = () => {
     const api = authApi();
-    if (!email || !api.requestReset) return notify('info', t('Cambiar contraseña estará disponible al conectar el login'));
+    if (!email) return;
     api.requestReset(email); // recuperación simulada: reutiliza la pantalla «Nueva contraseña»
     router.push('/auth/new-password' as never);
   };
 
   const cerrarSesion = () => {
     const api = authApi();
-    if (!api.logout) return notify('info', t('Cerrar sesión estará disponible al conectar el login'));
     api.logout(); // el layout raíz redirige a /auth/login cuando loggedIn pasa a false
   };
 
   const eliminar = () => {
     setConfirmDelete(false);
     const api = authApi();
-    if (!api.deleteAccount) return notify('info', t('Eliminar cuenta: pendiente de conectar con el login'));
     api.deleteAccount();
   };
 

@@ -3,9 +3,10 @@ import { Image, View, type ImageSourcePropType } from 'react-native';
 import i18n from 'i18next';
 import type { Equipment, Exercise, Muscle } from '../../data/seed';
 import { muscleImages } from '../workout/muscleImages';
+import { exerciseImages } from './exerciseImages';
 
 export const equipmentImages: Record<Equipment, ImageSourcePropType> = {
-  cardio: require('../../../assets/equipment/cardio.jpg'),
+  cardio: require('../../../assets/cardio/correr.png'),
   'sin-equipamiento': require('../../../assets/equipment/sin-equipamiento.jpg'),
   calistenia: require('../../../assets/equipment/calistenia.jpg'),
   barra: require('../../../assets/equipment/barra.jpg'),
@@ -30,8 +31,8 @@ export const muscleLabel = (m: Muscle) => i18n.t(MUSCLE_NAMES[m]);
 export const equipLabel = (q: Equipment) => i18n.t(equipmentLabels[q]);
 
 /** Miniatura del ejercicio: músculo trabajado (fuerza) o icono de cardio/equipamiento. */
-export function ExThumb({ ex, size, radius = 14 }: { ex: Pick<Exercise, 'muscles' | 'equipment'>; size: number; radius?: number }) {
-  const src = ex.muscles[0] ? muscleImages[ex.muscles[0]] : equipmentImages[ex.equipment];
+export function ExThumb({ ex, size, radius = 14 }: { ex: Pick<Exercise, 'muscles' | 'equipment'> & { id?: string }; size: number; radius?: number }) {
+  const src = (ex.id && exerciseImages[ex.id]) || (ex.muscles[0] ? muscleImages[ex.muscles[0]] : equipmentImages[ex.equipment]);
   return (
     <View style={{ width: size, height: size, borderRadius: radius, overflow: 'hidden', backgroundColor: '#070707' }}>
       <Image source={src} style={{ width: size, height: size }} resizeMode="cover" accessibilityIgnoresInvertColors />

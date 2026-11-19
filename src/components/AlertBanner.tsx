@@ -21,7 +21,9 @@ export function AlertBanner() {
   const accent = current.kind === 'error' ? colors.danger : colors.brand;
   return (
     <View pointerEvents="box-none" style={{ position: 'absolute', left: 16, right: 16, top: insets.top + 8, zIndex: 100 }}>
+      {/* Sin acción («Deshacer») el aviso no captura toques: no bloquea «Terminar» ni la cabecera mientras se ve. */}
       <Pressable
+        pointerEvents={current.actionLabel ? 'auto' : 'none'}
         accessibilityRole="alert" accessibilityLiveRegion="polite" accessibilityLabel={current.message} onPress={hide}
         style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, paddingHorizontal: 16, borderRadius: 16, backgroundColor: colors.card, borderWidth: highContrast ? 2 : 1.5, borderColor: accent }}
       >
