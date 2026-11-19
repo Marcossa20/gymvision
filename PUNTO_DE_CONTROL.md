@@ -39,6 +39,7 @@
 5. Revisión final de accesibilidad con lector de pantalla y prueba en Android.
 
 ## Notas
+- Catálogo ampliado: 31 ejercicios nuevos (45 en total) que cubren los 16 músculos y todos los equipamientos. Máquinas nuevas con código manual: PB-0102, 0176, 0467, 0471, 0482, 0493, 0494 y 0510 (B las usa sin cambios vía `exerciseByCode`). Cardio: falta Cinta y Comba (Cinta necesita su entrada en `features/cardio/catalog.ts`, de B; Comba no tiene imagen).
 - Resumen del entreno y Progreso de rango ya siguen el Figma (récords, músculos trabajados, mejora de rango del músculo). `WorkoutRecord` tiene campos opcionales nuevos `records`, `muscles` y `rankDelta`.
 - El aviso visual (banner) se ve sobre la cabecera, pero sin acción («Deshacer») no captura toques: «Terminar» sigue pulsable (comprobado en web). Con «Deshacer» sí captura toques unos 6 s.
 - Cuenta de demostración fija en `store/auth.ts` (miguel@correo.com): vale para la exposición; el hash es una simulación, no seguridad real.
