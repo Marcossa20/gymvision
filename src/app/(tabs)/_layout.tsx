@@ -1,5 +1,6 @@
 // Teoría (consistencia + reconocimiento antes que recuerdo): barra inferior fija de 4 pestañas con icono + texto.
 import React from 'react';
+import { Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Building2, Dumbbell, Hexagon, User } from 'lucide-react-native';
 import { useTheme } from '../../theme/useTheme';
@@ -17,8 +18,9 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.brand,
         tabBarInactiveTintColor: colors.textSecondary,
-        tabBarStyle: { backgroundColor: '#111114', borderTopColor: colors.divider, minHeight: 64, paddingTop: 8 },
-        tabBarLabelStyle: { fontSize: fs(11), fontWeight: '500' },
+        // Con el texto al máximo, «Mi gimnasio» no cabe en una línea: la etiqueta pasa a dos líneas y la barra crece (Reto 2).
+        tabBarStyle: { backgroundColor: '#111114', borderTopColor: colors.divider, minHeight: 64 + Math.round((fs(11) - 11) * 5.5), paddingTop: 8 },
+        tabBarLabel: ({ color, children }) => <Text numberOfLines={2} style={{ color, fontSize: fs(11), fontWeight: '500', textAlign: 'center' }}>{children}</Text>,
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
