@@ -601,5 +601,14 @@
   "Frente": "Front",
   "Leyenda": "Legend",
   "sin entrenar": "not trained",
-  "Sin entrenar": "Not trained"
+  "Sin entrenar": "Not trained",
+  "Aperturas en máquina (contractora)": "Machine flyes (pec deck)",
+  "Curl con barra": "Barbell curl",
+  "Extensión sobre la cabeza (cuerda)": "Overhead extension (rope)",
+  "Hip thrust": "Hip thrust",
+  "Pecho y tríceps": "Chest and triceps",
+  "Piernas": "Legs",
+  "Press de pecho inclinado (máquina)": "Incline chest press (machine)",
+  "Press francés con barra Z": "EZ-bar skull crusher",
+  "Press militar con mancuernas": "Dumbbell shoulder press"
 }
