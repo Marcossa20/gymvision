@@ -40,7 +40,7 @@
 
 ## Notas
 - Resumen del entreno y Progreso de rango ya siguen el Figma (récords, músculos trabajados, mejora de rango del músculo). `WorkoutRecord` tiene campos opcionales nuevos `records`, `muscles` y `rankDelta`.
-- El aviso visual (banner) tapa unos segundos la cabecera de la pantalla de entreno, incluido el botón «Terminar»: valorar moverlo o hacerlo no bloqueante.
+- El aviso visual (banner) se ve sobre la cabecera, pero sin acción («Deshacer») no captura toques: «Terminar» sigue pulsable (comprobado en web). Con «Deshacer» sí captura toques unos 6 s.
 - Cuenta de demostración fija en `store/auth.ts` (miguel@correo.com): vale para la exposición; el hash es una simulación, no seguridad real.
 - `Routine` usa `days: number[]` (0 = lunes) y los ejercicios pueden llevar `goal`/`target` (cardio). Guardado local con migración.
 - `assets/equipment/cardio.jpg` muestra un torso, no algo de cardio: revisar.
