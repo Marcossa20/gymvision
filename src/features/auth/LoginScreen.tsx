@@ -12,8 +12,10 @@ import { useAuth } from '../../store/auth';
 import { useProfile } from '../../store/profile';
 import { useTheme } from '../../theme/useTheme';
 import { Field, FormError } from './ui';
+import { useTranslation } from 'react-i18next';
 
 export function LoginScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const params = useLocalSearchParams<{ email?: string }>();
@@ -24,18 +26,18 @@ export function LoginScreen() {
 
   const submit = () => {
     if (!email.trim() || !password) {
-      setError('Escribe tu correo y tu contraseña.');
-      return notify('error', 'Faltan datos');
+      setError(t('Escribe tu correo y tu contraseña.'));
+      return notify('error', t('Faltan datos'));
     }
     const acc = useAuth.getState().login(email, password);
     if (!acc) {
-      setError('Correo o contraseña incorrectos. Revisa los datos o recupera tu contraseña.');
-      return notify('error', 'No se pudo iniciar sesión');
+      setError(t('Correo o contraseña incorrectos. Revisa los datos o recupera tu contraseña.'));
+      return notify('error', t('No se pudo iniciar sesión'));
     }
     // El perfil muestra los datos de la cuenta con la que se entra.
     const p = useProfile.getState();
     if (p.username !== acc.username) p.set({ name: acc.name, username: acc.username });
-    notify('serie', `Hola, ${acc.name.split(' ')[0]}`);
+    notify('serie', t('Hola, {{name}}', { name: acc.name.split(' ')[0] }));
     router.replace('/entrenar' as never);
   };
 
@@ -49,31 +51,31 @@ export function LoginScreen() {
             </View>
             <T size={32} weight="700" accessibilityRole="header">GymVision</T>
           </View>
-          <T size={24} weight="700" style={{ paddingBottom: 18 }}>Inicia sesión</T>
+          <T size={24} weight="700" style={{ paddingBottom: 18 }}>{t('Inicia sesión')}</T>
           <View style={{ gap: 16 }}>
             {error ? <FormError message={error} /> : null}
             <Field
-              label="Correo electrónico" icon={Mail} placeholder="tu@correo.com" value={email}
-              onChangeText={(t) => { setEmail(t); setError(null); }}
+              label={t('Correo electrónico')} icon={Mail} placeholder={t('tu@correo.com')} value={email}
+              onChangeText={(v) => { setEmail(v); setError(null); }}
               keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress"
               returnKeyType="next" onSubmitEditing={() => passRef.current?.focus()}
             />
             <Field
-              ref={passRef} label="Contraseña" icon={Lock} placeholder="Introduce tu contraseña" secure value={password}
-              onChangeText={(t) => { setPassword(t); setError(null); }}
+              ref={passRef} label={t('Contraseña')} icon={Lock} placeholder={t('Introduce tu contraseña')} secure value={password}
+              onChangeText={(v) => { setPassword(v); setError(null); }}
               autoCapitalize="none" autoComplete="password" textContentType="password" returnKeyType="go" onSubmitEditing={submit}
             />
             <Pressable onPress={() => router.push({ pathname: '/auth/forgot', params: { email } } as never)} accessibilityRole="link" style={{ alignSelf: 'flex-end', minHeight: 44, justifyContent: 'center' }}>
-              <T size={14} weight="600" color="brand">¿Has olvidado tu contraseña?</T>
+              <T size={14} weight="600" color="brand">{t('¿Has olvidado tu contraseña?')}</T>
             </Pressable>
           </View>
           <View style={{ paddingTop: 10 }}>
-            <Button label="Iniciar sesión" onPress={submit} style={{ borderRadius: 16 }} />
+            <Button label={t('Iniciar sesión')} onPress={submit} style={{ borderRadius: 16 }} />
           </View>
           <View style={{ flex: 1, minHeight: 24 }} />
-          <Pressable onPress={() => router.push('/auth/register' as never)} accessibilityRole="link" accessibilityLabel="¿Aún no tienes cuenta? Crear cuenta" style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, minHeight: 48, alignItems: 'center', marginBottom: 24 }}>
-            <T size={14.5} color="secondary">¿Aún no tienes cuenta?</T>
-            <T size={14.5} weight="700" color="brand">Crear cuenta</T>
+          <Pressable onPress={() => router.push('/auth/register' as never)} accessibilityRole="link" accessibilityLabel={t('¿Aún no tienes cuenta? Crear cuenta')} style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, minHeight: 48, alignItems: 'center', marginBottom: 24 }}>
+            <T size={14.5} color="secondary">{t('¿Aún no tienes cuenta?')}</T>
+            <T size={14.5} weight="700" color="brand">{t('Crear cuenta')}</T>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>

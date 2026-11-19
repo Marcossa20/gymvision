@@ -14,6 +14,8 @@ import { cancelNfc, getNfcStatus, readLockTag, simulateLockTag, type NfcStatus }
 import { useTheme } from '../../theme/useTheme';
 import { useGym } from './store';
 import { alpha, BottomActions, ScreenBar } from './ui';
+import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 
 
 type Phase = 'waiting' | 'open' | 'error';
@@ -41,6 +43,7 @@ function Waves({ active, children, onPress, label }: { active: boolean; children
 }
 
 export function LockerScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const lockerNo = useGym((s) => s.lockerNo);
@@ -53,7 +56,7 @@ export function LockerScreen() {
   const opened = useCallback((simulated: boolean) => {
     setLocker('open');
     setPhase('open');
-    notify('taquilla', `Taquilla ${lockerNo} abierta${simulated ? ' (simulada)' : ''}`);
+    notify('taquilla', simulated ? i18n.t('Taquilla {{n}} abierta (simulada)', { n: lockerNo }) : i18n.t('Taquilla {{n}} abierta', { n: lockerNo }));
   }, [lockerNo, setLocker]);
 
   const read = useCallback(async () => {
@@ -64,7 +67,7 @@ export function LockerScreen() {
       if (alive.current) opened(false);
     } catch (e) {
       if (!alive.current) return;
-      const msg = e instanceof Error ? e.message : 'Error de NFC';
+      const msg = e instanceof Error ? e.message : i18n.t('Error de NFC');
       setError(msg);
       setPhase('error');
       notify('error', msg);
@@ -79,7 +82,7 @@ export function LockerScreen() {
       if (s === 'ready') void read();
       else {
         setPhase('error');
-        setError(s === 'disabled' ? 'Activa el NFC en los ajustes del móvil.' : 'Este móvil no tiene NFC.');
+        setError(s === 'disabled' ? i18n.t('Activa el NFC en los ajustes del móvil.') : i18n.t('Este móvil no tiene NFC.'));
       }
     });
     return () => { alive.current = false; void cancelNfc(); };
@@ -98,27 +101,27 @@ export function LockerScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScreenBar title="Mi taquilla" onBack={close} />
+      <ScreenBar title={t('Mi taquilla')} onBack={close} />
       <View style={{ alignItems: 'center', paddingTop: 56, paddingHorizontal: 20, gap: 28 }}>
-        <Waves active={phase === 'waiting'} onPress={phase === 'error' && status === 'ready' ? read : undefined} label={isOpen ? 'Taquilla abierta' : phase === 'error' ? 'Reintentar lectura NFC' : 'Esperando la cerradura'}>
+        <Waves active={phase === 'waiting'} onPress={phase === 'error' && status === 'ready' ? read : undefined} label={isOpen ? t('Taquilla abierta') : phase === 'error' ? t('Reintentar lectura NFC') : t('Esperando la cerradura')}>
           {isOpen ? <Check size={64} color={colors.onBrand} strokeWidth={2.5} /> : <Nfc size={64} color={colors.onBrand} strokeWidth={2.5} />}
         </Waves>
         <View style={{ gap: 8, alignItems: 'center' }}>
-          <T size={24} weight="700" style={{ textAlign: 'center' }} accessibilityRole="header">{isOpen ? 'Taquilla abierta' : 'Acerca el móvil a la cerradura'}</T>
+          <T size={24} weight="700" style={{ textAlign: 'center' }} accessibilityRole="header">{isOpen ? t('Taquilla abierta') : t('Acerca el móvil a la cerradura')}</T>
           <T size={15} color="secondary" style={{ textAlign: 'center' }}>
-            {isOpen ? `Taquilla ${lockerNo} · Ya puedes guardar tus cosas` : `Taquilla ${lockerNo} · Cerrada`}
+            {isOpen ? t('Taquilla {{n}} · Ya puedes guardar tus cosas', { n: lockerNo }) : t('Taquilla {{n}} · Cerrada', { n: lockerNo })}
           </T>
         </View>
         <View accessible accessibilityLiveRegion="polite" style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: phase === 'error' ? colors.danger : colors.divider, backgroundColor: colors.card, maxWidth: '100%' }}>
           {isOpen ? <LockOpen size={16} color={colors.brand} /> : <Lock size={16} color={phase === 'error' ? colors.danger : colors.brand} />}
-          <T size={13} weight="500" style={{ flexShrink: 1 }}>{isOpen ? 'Abierta' : phase === 'error' ? error : 'Esperando la cerradura…'}</T>
+          <T size={13} weight="500" style={{ flexShrink: 1 }}>{isOpen ? t('Abierta') : phase === 'error' ? error : t('Esperando la cerradura…')}</T>
         </View>
       </View>
       <View style={{ flex: 1 }} />
       <BottomActions>
-        {showSimulate ? <Button variant="secondary" label="Simular cerradura" onPress={simulate} /> : null}
-        {phase === 'error' && status === 'ready' ? <Button variant="secondary" label="Reintentar" onPress={read} /> : null}
-        {isOpen ? <Button label="Hecho" onPress={close} /> : <Button variant="secondary" label="Cancelar" onPress={close} />}
+        {showSimulate ? <Button variant="secondary" label={t('Simular cerradura')} onPress={simulate} /> : null}
+        {phase === 'error' && status === 'ready' ? <Button variant="secondary" label={t('Reintentar')} onPress={read} /> : null}
+        {isOpen ? <Button label={t('Hecho')} onPress={close} /> : <Button variant="secondary" label={t('Cancelar')} onPress={close} />}
       </BottomActions>
     </SafeAreaView>
   );

@@ -16,6 +16,7 @@ import { useTheme } from '../../theme/useTheme';
 import { accessPayload, ROTATE_MS } from './accessToken';
 import { useGym } from './store';
 import { BottomActions, ScreenBar } from './ui';
+import { useTranslation } from 'react-i18next';
 
 // Colores fijos del código QR: deben ser negro/blanco para cualquier lector, no dependen del tema.
 const QR_DARK = '#000000';
@@ -47,6 +48,7 @@ function Chip({ icon, label }: { icon: React.ReactNode; label: string }) {
 }
 
 export function AccessScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const name = useProfile((s) => s.name);
@@ -55,8 +57,8 @@ export function AccessScreen() {
   const [bright, setBright] = useState(false);
 
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 250);
-    return () => clearInterval(t);
+    const id = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(id);
   }, []);
 
   // Brillo al máximo solo en esta pantalla; se restaura al salir.
@@ -79,34 +81,34 @@ export function AccessScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScreenBar title="Mi acceso" />
+      <ScreenBar title={t('Mi acceso')} />
       <ScrollView contentContainerStyle={{ alignItems: 'center', paddingHorizontal: 20, paddingTop: 12, gap: 20 }}>
         <View style={{ alignItems: 'center', gap: 4 }}>
           <T size={24} weight="700" style={{ textAlign: 'center' }}>{name}</T>
-          <T size={14} color="secondary" style={{ textAlign: 'center' }}>Socio nº {memberNo} · {gymName}</T>
+          <T size={14} color="secondary" style={{ textAlign: 'center' }}>{t('Socio nº {{n}}', { n: memberNo })} · {t(gymName)}</T>
         </View>
-        <View accessible accessibilityRole="image" accessibilityLabel={`Código QR de acceso del socio ${memberNo}`} style={{ width: 300, height: 300, borderRadius: 28, backgroundColor: QR_LIGHT, alignItems: 'center', justifyContent: 'center' }}>
+        <View accessible accessibilityRole="image" accessibilityLabel={t('Código QR de acceso del socio {{n}}', { n: memberNo })} style={{ width: 300, height: 300, borderRadius: 28, backgroundColor: QR_LIGHT, alignItems: 'center', justifyContent: 'center' }}>
           <QrMatrix value={payload} size={240} />
         </View>
         <View style={{ width: 300, gap: 10, alignItems: 'center' }}>
-          <View accessible accessibilityLabel={`Se renueva en ${secs} segundos`} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View accessible accessibilityLabel={t('Se renueva en {{n}} segundos', { n: secs })} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <RefreshCw size={18} color={colors.brand} />
-            <T size={15} weight="600">Se renueva en 0:{String(secs).padStart(2, '0')}</T>
+            <T size={15} weight="600">{t('Se renueva en {{time}}', { time: `0:${String(secs).padStart(2, '0')}` })}</T>
           </View>
           <View style={{ width: 300, height: 6, borderRadius: 3, backgroundColor: colors.switchOff, overflow: 'hidden' }}>
             <View style={{ width: `${(msLeft / ROTATE_MS) * 100}%`, height: '100%', borderRadius: 3, backgroundColor: colors.brand }} />
           </View>
         </View>
         <View style={{ alignItems: 'center', gap: 8 }}>
-          <T size={17} weight="600" style={{ textAlign: 'center' }}>Acerca el QR al lector del torno</T>
+          <T size={17} weight="600" style={{ textAlign: 'center' }}>{t('Acerca el QR al lector del torno')}</T>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
-            <Chip icon={<WifiOff size={14} color={colors.textSecondary} />} label="Funciona sin conexión" />
-            {bright ? <Chip icon={<Sun size={14} color={colors.textSecondary} />} label="Brillo al máximo" /> : null}
+            <Chip icon={<WifiOff size={14} color={colors.textSecondary} />} label={t('Funciona sin conexión')} />
+            {bright ? <Chip icon={<Sun size={14} color={colors.textSecondary} />} label={t('Brillo al máximo')} /> : null}
           </View>
         </View>
       </ScrollView>
       <BottomActions>
-        <Button variant="secondary" label="Cerrar" onPress={() => (router.canGoBack() ? router.back() : router.replace('/gimnasio' as never))} />
+        <Button variant="secondary" label={t('Cerrar')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/gimnasio' as never))} />
       </BottomActions>
     </SafeAreaView>
   );

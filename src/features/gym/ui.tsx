@@ -8,19 +8,21 @@ import { useRouter } from 'expo-router';
 import { ChevronLeft, X } from 'lucide-react-native';
 import { T } from '../../components/ui';
 import { useTheme } from '../../theme/useTheme';
+import { useTranslation } from 'react-i18next';
 
 /** Color con transparencia a partir de un token #RRGGBB (para fondos suaves sin inventar colores). */
 export const alpha = (hex: string, a: number) =>
   /^#[0-9a-f]{6}$/i.test(hex) ? hex + Math.round(a * 255).toString(16).padStart(2, '0') : hex;
 
 export function ScreenBar({ title, icon = 'close', onBack }: { title: string; icon?: 'close' | 'back'; onBack?: () => void }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
   const back = onBack ?? (() => (router.canGoBack() ? router.back() : router.replace('/gimnasio' as never)));
   const Icon = icon === 'close' ? X : ChevronLeft;
   return (
     <View style={{ height: 56, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 }}>
-      <Pressable accessibilityRole="button" accessibilityLabel={icon === 'close' ? 'Cerrar' : 'Volver'} onPress={back} hitSlop={4} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+      <Pressable accessibilityRole="button" accessibilityLabel={icon === 'close' ? t('Cerrar') : t('Volver')} onPress={back} hitSlop={4} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
         <Icon size={icon === 'close' ? 26 : 28} color={colors.textPrimary} strokeWidth={2} />
       </Pressable>
       <View style={{ flex: 1, alignItems: 'center' }}>
