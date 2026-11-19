@@ -12,6 +12,7 @@ export interface Exercise {
   equipment: Equipment;
   type: 'fuerza' | 'cardio';
   machineCode?: string; // código manual / QR
+  notes?: string; // notas propias al crear el ejercicio (Figma «Crear ejercicio»)
 }
 
 export type CardioGoal = 'time' | 'steps' | 'distance';

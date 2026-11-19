@@ -610,5 +610,14 @@
   "Piernas": "Legs",
   "Press de pecho inclinado (máquina)": "Incline chest press (machine)",
   "Press francés con barra Z": "EZ-bar skull crusher",
-  "Press militar con mancuernas": "Dumbbell shoulder press"
+  "Press militar con mancuernas": "Dumbbell shoulder press",
+  "Crea tu primera rutina: elige ejercicios, días y descansos. Funciona sin conexión.": "Create your first routine: pick exercises, days and rests. Works offline.",
+  "Resultados": "Results",
+  "Resultados · {{n}}": "Results · {{n}}",
+  "Recientes": "Recent",
+  "Elige el músculo principal": "Choose the main muscle",
+  "Músculo principal": "Main muscle",
+  "Elige un músculo": "Choose a muscle",
+  "Notas (opcional)": "Notes (optional)",
+  "Ej. Pausa de 1 s abajo, banco a 30°": "E.g. 1 s pause at the bottom, bench at 30°"
 }

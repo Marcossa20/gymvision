@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Calendar, ChevronLeft, ChevronRight, Copy, EllipsisVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
+import { Calendar, ChevronLeft, Dumbbell, ChevronRight, Copy, EllipsisVertical, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { Button, T } from '../../components/ui';
 import { WEEK_LETTERS, WEEK_NAMES, type Routine } from '../../data/seed';
 import { notify } from '../../services/alerts';
@@ -13,6 +13,7 @@ import { useTheme } from '../../theme/useTheme';
 import { estimateMinutes } from '../workout/EntrenarScreen';
 import { useDraft } from './draft';
 import { ExThumb } from './Thumb';
+import { alpha } from '../gym/ui';
 import { exerciseById } from '../../data/seed';
 import { useTranslation } from 'react-i18next';
 
@@ -56,9 +57,12 @@ export function MyRoutinesScreen() {
         </View>
 
         {routines.length === 0 ? (
-          <View style={{ alignItems: 'center', gap: 8, paddingVertical: 48 }}>
-            <T size={18} weight="600">{t('Aún no tienes rutinas')}</T>
-            <T size={14} color="secondary" style={{ textAlign: 'center' }}>{t('Crea la primera con el botón de abajo.')}</T>
+          <View style={{ alignItems: 'center', gap: 10, paddingTop: 120, paddingHorizontal: 12 }}>
+            <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: alpha(colors.brand, 0.14), alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
+              <Dumbbell size={36} color={colors.brand} />
+            </View>
+            <T size={20} weight="700" style={{ textAlign: 'center' }}>{t('Aún no tienes rutinas')}</T>
+            <T size={14} color="secondary" style={{ textAlign: 'center' }}>{t('Crea tu primera rutina: elige ejercicios, días y descansos. Funciona sin conexión.')}</T>
           </View>
         ) : null}
 
@@ -100,7 +104,7 @@ export function MyRoutinesScreen() {
       </ScrollView>
 
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingBottom: 24, paddingTop: 12, backgroundColor: colors.bg }}>
-        <Button label={t('Añadir rutina')} icon={<Plus size={22} color={colors.onBrand} />} onPress={() => { useDraft.getState().clear(); router.push({ pathname: '/routines/edit/[id]', params: { id: 'new' } }); }} />
+        <Button label={routines.length === 0 ? t('Crea tu rutina') : t('Añadir rutina')} icon={routines.length === 0 ? undefined : <Plus size={22} color={colors.onBrand} />} onPress={() => { useDraft.getState().clear(); router.push({ pathname: '/routines/edit/[id]', params: { id: 'new' } }); }} />
       </View>
 
       {/* Menú de la rutina (hoja inferior) */}

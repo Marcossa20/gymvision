@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 const MUSCLES = Object.keys(muscleImages) as Muscle[];
 const EQUIPMENT = Object.keys(equipmentLabels) as Equipment[];
 
-function Sheet({ title, visible, onClose, children }: { title: string; visible: boolean; onClose: () => void; children: React.ReactNode }) {
+export function Sheet({ title, visible, onClose, children }: { title: string; visible: boolean; onClose: () => void; children: React.ReactNode }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   return (
@@ -50,6 +50,10 @@ export function AddExerciseScreen() {
 
   useEffect(() => { if (routineId) load(routineId); }, [routineId, load]);
   useEffect(() => { if (draft && sel === null) setSel(draft.exercises.map((e) => e.exerciseId)); }, [draft, sel]);
+  // Un ejercicio recién creado entra en la rutina desde «Crear ejercicio»: se refleja aquí al volver.
+  useEffect(() => {
+    if (draft) setSel((s) => (s === null ? s : Array.from(new Set([...s, ...draft.exercises.map((e) => e.exerciseId)]))));
+  }, [draft?.exercises.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -72,9 +76,9 @@ export function AddExerciseScreen() {
 
   const filterBtn = (label: string, active: boolean, onPress: () => void) => (
     <Pressable accessibilityRole="button" accessibilityLabel={t('Filtro {{name}}', { name: label })} accessibilityState={{ selected: active }} onPress={onPress}
-      style={{ flex: 1, minHeight: 48, borderRadius: 14, backgroundColor: active ? colors.brand : colors.switchOff, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 8 }}>
-      <T size={15} weight="500" color={active ? colors.onBrand : colors.textPrimary} numberOfLines={1}>{label}</T>
-      <ChevronDown size={18} color={active ? colors.onBrand : colors.textPrimary} />
+      style={[{ flex: 1, minHeight: 48, borderRadius: 14, backgroundColor: active ? colors.card : colors.switchOff, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 8 }, active && { borderWidth: 2, borderColor: colors.brand }]}>
+      <T size={15} weight={active ? '700' : '500'} numberOfLines={1}>{label}</T>
+      <ChevronDown size={18} color={active ? colors.brand : colors.textPrimary} />
     </Pressable>
   );
 
@@ -95,7 +99,7 @@ export function AddExerciseScreen() {
           {filterBtn(muscle ? muscleLabel(muscle) : t('Músculos'), !!muscle, () => setSheet('muscle'))}
           {filterBtn(equip ? equipLabel(equip) : t('Equipamiento'), !!equip, () => setSheet('equip'))}
         </View>
-        <T size={20} weight="700" accessibilityRole="header">{filtering ? (equip === 'cardio' ? 'Resultados Cardio' : `Resultados · ${list.length}`) : 'Recientes'}</T>
+        <T size={20} weight="700" accessibilityRole="header">{filtering ? (equip === 'cardio' ? t('Resultados') : t('Resultados · {{n}}', { n: list.length })) : t('Recientes')}</T>
         {list.length === 0 ? <T size={15} color="secondary">{t('No hay ejercicios con ese filtro.')}</T> : null}
         <View style={{ gap: 8 }}>
           {list.map((e) => {
