@@ -651,5 +651,9 @@
   "Abductores (máquina)": "Abducteurs (machine)",
   "Plancha": "Gainage",
   "Crunch en máquina": "Crunch à la machine",
-  "Elevación de piernas colgado": "Relevé de jambes suspendu"
+  "Elevación de piernas colgado": "Relevé de jambes suspendu",
+  "Este ejercicio aún no tiene tutorial": "Cet exercice n'a pas encore de tutoriel",
+  "Pausar animación": "Mettre l'animation en pause",
+  "Reproducir animación": "Lancer l'animation",
+  "Animación del movimiento: {{name}}": "Animation du mouvement : {{name}}"
 }

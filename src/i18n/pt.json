@@ -651,5 +651,9 @@
   "Abductores (máquina)": "Abdutores (máquina)",
   "Plancha": "Prancha",
   "Crunch en máquina": "Abdominais na máquina",
-  "Elevación de piernas colgado": "Elevação de pernas suspenso"
+  "Elevación de piernas colgado": "Elevação de pernas suspenso",
+  "Este ejercicio aún no tiene tutorial": "Este exercício ainda não tem tutorial",
+  "Pausar animación": "Pausar animação",
+  "Reproducir animación": "Reproduzir animação",
+  "Animación del movimiento: {{name}}": "Animação do movimento: {{name}}"
 }
