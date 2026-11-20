@@ -182,11 +182,11 @@ Test (paso 4 del reto 1): simulación de Machado (2009, severidad 1.0, RGB linea
 
 | Modo | Paleta original | Paleta adaptada v2 |
 |---|---|---|
-| Protanopia | 17,5 ✕ | 41,1 ✓ |
-| Deuteranopia | 5,9 ✕ | 36,4 ✓ |
+| Protanopia | 17,1 ✕ | 40,9 ✓ |
+| Deuteranopia | 6,0 ✕ | 36,5 ✓ |
 | Tritanopia | 20,5 ✓ (justo) | 36,9 ✓ |
 
-(La v1, basada directamente en Okabe-Ito, empeoraba en Tritanopia: 14,8. Por eso se reajustó.) Implementa `useRankColors()` que lea el ajuste. Si se cambia una paleta, repite el test (script de referencia: simulación + ΔE) antes de darla por buena.
+(La v1, basada directamente en Okabe-Ito, empeoraba en Tritanopia: 14,8. Por eso se reajustó.) Implementa `useRankColors()` que lea el ajuste. Si se cambia una paleta, repite el test (`node scripts/test-daltonismo.js`, lee las paletas de `src/theme/tokens.ts`) antes de darla por buena. Los números de la tabla son los que da ese script y los mismos que cita la memoria de la Entrega 2.
 
 Las pantallas "Visto con … (claro)" del Figma son **simulaciones de visión** para el informe; **no se implementan**.
 

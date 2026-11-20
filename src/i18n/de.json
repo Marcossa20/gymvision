@@ -651,5 +651,9 @@
   "Abductores (máquina)": "Abduktoren (Maschine)",
   "Plancha": "Unterarmstütz",
   "Crunch en máquina": "Bauchpresse an der Maschine",
-  "Elevación de piernas colgado": "Beinheben im Hang"
+  "Elevación de piernas colgado": "Beinheben im Hang",
+  "Este ejercicio aún no tiene tutorial": "Für diese Übung gibt es noch kein Tutorial",
+  "Pausar animación": "Animation pausieren",
+  "Reproducir animación": "Animation abspielen",
+  "Animación del movimiento: {{name}}": "Bewegungsanimation: {{name}}"
 }
