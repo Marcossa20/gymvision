@@ -40,7 +40,7 @@ Sin móvil: `npx expo start --web` abre una versión en el navegador (sin vibrac
 ## Pantallas principales
 
 - **Rangos:** nivel general, mapa muscular frente/espalda coloreado por rango, rangos por grupo y detalle de cada músculo.
-- **Entrenar:** plan del día, rutinas (crear, editar, ordenar arrastrando), entreno en curso con series, descanso integrado y resumen.
+- **Entrenar:** plan del día, rutinas (crear, editar, ordenar arrastrando), entreno en curso con series, descanso integrado y resumen. El botón **Tutorial** del entreno en curso abre un vídeo corto en bucle con la técnica del ejercicio (38 ejercicios, sin sonido y con botón de pausa).
 - **Mi gimnasio:** QR de acceso al torno (se renueva cada 30 s), taquilla por NFC, escáner de QR de máquinas con código manual como alternativa.
 - **Cardio:** en Caminata y Correr el **acelerómetro** detecta los pasos y el cronómetro arranca y se pausa solo.
 - **Perfil:** historial de entrenos, progreso (volumen y series por semana, mes, 3 meses, año), detalle de entreno y edición del perfil.
